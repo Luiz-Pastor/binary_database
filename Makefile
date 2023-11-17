@@ -1,6 +1,6 @@
 ##############################################
 CC := gcc
-CFLAGS := -Wall -Werror -ansi -pedantic
+CFLAGS := -Wall -Werror
 ##############################################
 NAME=library
 SRC=	main.c
@@ -10,14 +10,14 @@ OBJ=$(SRC:%.c=%.o)
 all: $(NAME)
 
 $(NAME): $(OBJ)
-	$(CC) $^ -o $(NAME)
+	@$(CC) $^ -o $(NAME)
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c $<
+	@$(CC) $(CFLAGS) -c $<
 
 ##############################################
-run:
-	./library best_fit test.db
+run: re
+	@./library best_fit data.db
 ##############################################
 
 clean:
