@@ -25,7 +25,7 @@ static int  check_arguments(int argc, char **argv)
     if (strcmp(argv[1], "best_fit") && strcmp(argv[1], "first_fit") && strcmp(argv[1], "worst_fit"))
         return 0;
 
-    file = fopen(argv[2], "w");
+    file = fopen(argv[2], "rb");
     if (!file)
         return (0);
     fclose(file);
@@ -35,6 +35,42 @@ static int  check_arguments(int argc, char **argv)
 
 Element **read_database(char *filename)
 {
+    size_t  size;
+    int     key;
+    char    isbn[ISBN_LENGTH];
+    char    *title;
+
+    int     length; /* Aux */
+    // char    *printedBy;
+    // char aux;
+
+    // Element *node;
+    
+    FILE    *file;
+
+    file = fopen(filename, "rb");
+    if (!file)
+        return (printf("No open\n"), NULL);
+
+    fread(&size, sizeof(size_t), 1, file);
+    printf("> %ld\n", size);
+
+    fread(&key, sizeof(int), 1, file);
+    printf("> %d\n", key);
+
+    fread(isbn, sizeof(char), ISBN_LENGTH, file);
+    isbn[ISBN_LENGTH] = '\0';
+    printf("> %s\n", isbn);
+
+    title = calloc(1, 1);
+    if (!title)
+    {
+        fclose(file);
+        return (NULL);
+    }
+
+
+    fclose(file);
     return (NULL);
 }
 
