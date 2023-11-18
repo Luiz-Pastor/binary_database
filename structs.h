@@ -16,7 +16,7 @@ typedef struct{
 
 typedef struct{
     indexbook   index;
-    char        ISBN[ISBN_LENGTH];
+    char        isbn[ISBN_LENGTH + 1];
     char        *title;        /* Tamaño variable, máximo de `MAX_LENGTH`*/
     char        *printedBy;    /* Tamaño variable, máximo de `MAX_LENGTH`*/
 } Element;
