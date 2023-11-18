@@ -32,21 +32,35 @@ static int  check_arguments(int argc, char **argv)
     return 1;
 }
 
+static int  number_length(int number)
+{
+    int count = 0;
+    if (number == 0)
+        return (1);
+    while (number != 0)
+    {
+        count++;
+        number /= 10;
+    }
+    return (count);
+}
+
 
 Element **read_database(char *filename)
 {
+    FILE    *file;
+
+    /* Campos a rellenar */
     size_t  size;
     int     key;
-    char    isbn[ISBN_LENGTH];
+    char    isbn[ISBN_LENGTH + 1];
     char    *title;
+    char    *printedBy;
 
-    int     length; /* Aux */
-    // char    *printedBy;
-    // char aux;
-
-    // Element *node;
-    
-    FILE    *file;
+    /* Variables auxiliares */
+    char    letter[2];
+    char    text[MAX_LENGTH] = "";
+    int     count;
 
     file = fopen(filename, "rb");
     if (!file)
@@ -57,18 +71,30 @@ Element **read_database(char *filename)
 
     fread(&key, sizeof(int), 1, file);
     printf("> %d\n", key);
-
+    
     fread(isbn, sizeof(char), ISBN_LENGTH, file);
     isbn[ISBN_LENGTH] = '\0';
     printf("> %s\n", isbn);
 
-    title = calloc(1, 1);
+    do{
+        fread(letter, sizeof(char), 1, file);
+        letter[1] = '\0';
+        if (letter[0] != '|')
+            strcat(text, letter);
+    } while (letter[0] != '|');
+    title = calloc(strlen(text) + 1, sizeof(char));
     if (!title)
-    {
-        fclose(file);
         return (NULL);
-    }
+    strcpy(title, text);
+    printf("> %s\n", title);
 
+    printf("\tSobrante: %ld\n", size - number_length(key) - strlen(isbn) - strlen(title));
+    count = size - number_length(key) - strlen(isbn) - strlen(title);
+    printedBy = calloc(count + 1, sizeof(char));
+    if (!printedBy)
+        return NULL;
+    fread(printedBy, sizeof(char), count, file);
+    printf("> %s\n", printedBy);
 
     fclose(file);
     return (NULL);
