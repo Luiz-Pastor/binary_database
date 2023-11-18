@@ -1,6 +1,6 @@
 ##############################################
 CC := gcc
-CFLAGS := -Wall -Werror
+CFLAGS := -Wall -Werror -g3
 ##############################################
 NAME=library
 SRC=	main.c
@@ -17,7 +17,10 @@ $(NAME): $(OBJ)
 
 ##############################################
 run: re
-	@./library best_fit data.db
+	@./$(NAME) best_fit data.db | cat -e
+
+valgrind: re
+	@valgrind --leak-check=full ./$(NAME) best_fit data.db
 ##############################################
 
 clean:
