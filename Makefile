@@ -1,9 +1,10 @@
 ##############################################
 CC := gcc
-CFLAGS := -Wall -Werror -g3
+CFLAGS := -Wall -Werror -pedantic -ansi -g3
 ##############################################
 NAME=library
-SRC=	main.c
+SRC=	main.c	\
+		element.c
 OBJ=$(SRC:%.c=%.o)
 ##############################################
 
@@ -17,6 +18,9 @@ $(NAME): $(OBJ)
 
 ##############################################
 run: re
+	@./$(NAME) best_fit data.db
+
+rune: re
 	@./$(NAME) best_fit data.db | cat -e
 
 valgrind: re
