@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "structs.h"
+#include "element.h"
 
 /*
 TODO:
@@ -32,7 +33,7 @@ static int  check_arguments(int argc, char **argv)
     return 1;
 }
 
-static int  number_length(int number)
+int  number_length(int number)
 {
     int count = 0;
     if (number == 0)
@@ -45,59 +46,131 @@ static int  number_length(int number)
     return (count);
 }
 
+void    printDatabase(Element **database)
+{
+    int index = 0;
+
+    while (database[index])
+    {
+        printElement(database[index++]);
+        printf("\n=================\n\n");
+    }
+}
+
+void    free_database(Element **database)
+{
+    int index = 0;
+
+    while (database[index])
+        deleteElement(database[index++]);
+    free(database);
+    return ;
+}
 
 Element **read_database(char *filename)
 {
     FILE    *file;
-
-    /* Campos a rellenar */
-    size_t  size;
-    int     key;
-    char    isbn[ISBN_LENGTH + 1];
-    char    *title;
-    char    *printedBy;
+    Element *element;
+    Element **database;
+    /*Element **memory;*/
+    int     database_size = 1;
 
     /* Variables auxiliares */
+    int     i;
+    int     offset = 0;
     char    letter[2];
-    char    text[MAX_LENGTH] = "";
+    char    text[MAX_LENGTH];
     int     count;
 
     file = fopen(filename, "rb");
     if (!file)
         return (printf("No open\n"), NULL);
 
-    fread(&size, sizeof(size_t), 1, file);
-    printf("> %ld\n", size);
-
-    fread(&key, sizeof(int), 1, file);
-    printf("> %d\n", key);
-    
-    fread(isbn, sizeof(char), ISBN_LENGTH, file);
-    isbn[ISBN_LENGTH] = '\0';
-    printf("> %s\n", isbn);
-
-    do{
-        fread(letter, sizeof(char), 1, file);
-        letter[1] = '\0';
-        if (letter[0] != '|')
-            strcat(text, letter);
-    } while (letter[0] != '|');
-    title = calloc(strlen(text) + 1, sizeof(char));
-    if (!title)
+    database = (Element **) malloc(sizeof(Element *));
+    if (!database)
+    {
+        fclose(file);
         return (NULL);
-    strcpy(title, text);
-    printf("> %s\n", title);
+    }
 
-    printf("\tSobrante: %ld\n", size - number_length(key) - strlen(isbn) - strlen(title));
-    count = size - number_length(key) - strlen(isbn) - strlen(title);
-    printedBy = calloc(count + 1, sizeof(char));
-    if (!printedBy)
-        return NULL;
-    fread(printedBy, sizeof(char), count, file);
-    printf("> %s\n", printedBy);
+    while (!feof(file))
+    {
+        /* Reiniciamos la variable donde pondremos texto variable */
+        for (i = 0; i < MAX_LENGTH; i++)
+            text[i] = '\0';
+        /* Creamos el nodo del elemento */
+        element = createElement();
+        if (!element)
+        {
+            free_database(database);
+            fclose(file);
+            return (NULL);
+        }
+
+        /* Fijamos el offset */
+        element->index.offset = offset;
+
+        /* Guardamos el tamaño del bloque */
+        fread(&(element->index.size), sizeof(size_t), 1, file);
+        if (feof(file))
+        {
+            deleteElement(element);
+            break;
+        }
+
+        /* Guardamos el bookId */
+        fread(&(element->index.key), sizeof(int), 1, file);
+
+        /* Guardamos el ISBN */
+        fread(element->isbn, sizeof(char), ISBN_LENGTH, file);
+        element->isbn[ISBN_LENGTH] = '\0';
+
+        /*
+            Guardamos todo en una variable auxiliar, hasta encontrar un '|'.
+            Después, reservamos el espacio necesario para almacenarlo en el nombre
+            del titulo. Así, no desperdiciamos espacio/memoria
+        */
+        do{
+            fread(letter, sizeof(char), 1, file);
+            letter[1] = '\0';
+            if (letter[0] != '|')
+                strcat(text, letter);
+        } while (letter[0] != '|');
+
+        element->title = calloc(strlen(text) + 1, sizeof(char));
+        if (!(element->title))
+            return (NULL);
+        strcpy(element->title, text);
+    
+        /*
+            Calculamos cuantos caracteres nos quedan por leer, y leemos esa cantidad.
+            Todo ello forma parte del campo 'printedBy'
+        */
+        count = (element->index.size) - number_length(element->index.key) - strlen(element->isbn) - strlen(element->title);
+        element->printedBy = calloc(count + 1, sizeof(char));
+        if (!(element->printedBy))
+            return NULL;
+        fread(element->printedBy, sizeof(char), count, file);
+
+        /* Calculamos el offset del siguiente elemento */
+        offset += element->index.size +  strlen(element->printedBy) + 1;
+
+        /* Añadimos un elemento a la base de datos y lo metemos */
+        database = (Element **) realloc(database, (database_size + 1) * sizeof(Element *));
+        if (!database)
+        {
+            deleteElement(element);
+            free_database(database);
+            fclose(file);
+            return (NULL);
+        }
+        database[database_size - 1] = element;
+        database_size++;
+    }
+    database[database_size - 1] = NULL;
 
     fclose(file);
-    return (NULL);
+    return (database);
 }
 
 
@@ -107,11 +180,6 @@ void    take_commands(Element **database)
 }
 
 void    save_database(Element **database)
-{
-    return ;
-}
-
-void    free_database(Element **database)
 {
     return ;
 }
@@ -131,6 +199,8 @@ int main(int argc, char *argv[])
         printf("Database file error.\n");
         return 1;
     }
+
+    printDatabase(database);
 
     /* Read the user commands */
     take_commands(database);
