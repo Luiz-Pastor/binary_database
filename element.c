@@ -39,8 +39,7 @@ void	deleteElement(Element *element)
 
 void	printElement(Element *element)
 {
-	printf("Offset: %ld\n", element->index.offset);
-    printf("Tamano del bloque: %ld\n", element->index.size);
+    printf("Tamano del bloque: %ld (offset: %ld)\n", element->index.size, element->index.offset);
     printf("\tBookID:\t\t%d\n", element->index.key);
     printf("\tIDBN:\t\t%s\n", element->isbn);
     printf("\tTitle:\t\t%s\n", element->title);
