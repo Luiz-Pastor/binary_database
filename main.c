@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
     take_commands(database);
 
     /* Save all the information in the database file */
-    save_database(database, "database.db");
+    save_database(database, argv[2]);
 
     /* Free the memory */
     free_database(database); /* Una alternativa puede ser usar exit */
