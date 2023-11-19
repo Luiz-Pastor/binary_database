@@ -6,6 +6,14 @@
 
 /* =========================================*/
 
+/*
+ * @bried	Function that obtains the length of a number (number of digits). Does
+ 			not give information about the signs.
+ *
+ * @param	number Number whose length is to be looked at.
+ * 
+ * @return	The number of digits of the number.
+*/
 static int  number_length(int number)
 {
     int count = 0;
@@ -19,6 +27,17 @@ static int  number_length(int number)
     return (count);
 }
 
+/*
+ * @bried	Function that is responsible for eliminating all memory and closing
+ 			the reading file if there is any problem in the process of reading
+			the database.
+ *
+ * @param	element Block that was being created to add to the database.
+ * @param	database Database that was being created with the file information.
+ * #param	file Pointer to the file from which the information was being read.
+ * 
+ * @return	NULL.
+*/
 static void	*error_reading(Element *element, Element **database, FILE **file)
 {
 	if (element)
@@ -31,6 +50,7 @@ static void	*error_reading(Element *element, Element **database, FILE **file)
 
 /* =========================================*/
 
+/* Function that is responsible for reading a database through a binary file */
 Element **read_database(char *filename)
 {
     FILE    *file;				/* Archivo del que leer */
@@ -143,6 +163,7 @@ Element **read_database(char *filename)
     return (database);
 }
 
+/* Function that deletes a database (NULL-terminated) */
 void    *free_database(Element **database)
 {
     int index = 0;
@@ -155,6 +176,7 @@ void    *free_database(Element **database)
     return (NULL);
 }
 
+/* Function that prints all the information of a database */
 void    printDatabase(Element **database)
 {
     int index = 0;
@@ -167,15 +189,19 @@ void    printDatabase(Element **database)
     }
 }
 
+/* Function that obtains the number of blocks that a database has */
 size_t	databaseLength(Element **database)
 {
 	size_t	size = 0;
 
+	if (!database)
+		return (0);
 	while (database[size])
 		size++;
 	return size;
 }
 
+/* Function that adds a block to the database */
 Element	**addDatabaseElement(Element **database, Element *element)
 {
 	Element	**memory;
@@ -194,6 +220,7 @@ Element	**addDatabaseElement(Element **database, Element *element)
 	return database;
 }
 
+/* Function that saves the database information in a file */
 void    save_database(Element **database, char *filename)
 {
 	FILE	*file;
