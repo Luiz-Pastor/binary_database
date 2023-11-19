@@ -3,8 +3,11 @@ CC := gcc
 CFLAGS := -Wall -Werror -pedantic -ansi -g3
 ##############################################
 NAME=library
-SRC=	main.c	\
-		element.c
+HEADER=element.h
+SRC=	main.c		\
+		element.c	\
+		database.c	\
+		loop.c
 OBJ=$(SRC:%.c=%.o)
 ##############################################
 
@@ -17,14 +20,14 @@ $(NAME): $(OBJ)
 	@$(CC) $(CFLAGS) -c $<
 
 ##############################################
-run: re
+run: $(NAME)
 	@./$(NAME) best_fit data.db
 
-rune: re
+rune: $(NAME)
 	@./$(NAME) best_fit data.db | cat -e
 
-valgrind: re
-	@valgrind --leak-check=full ./$(NAME) best_fit data.db
+valgrind: $(NAME)
+	@valgrind -s --leak-check=full ./$(NAME) best_fit data.db
 ##############################################
 
 clean:
