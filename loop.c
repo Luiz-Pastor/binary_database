@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "element.h"
 #include "loop.h"
 
 enum {
@@ -9,6 +10,22 @@ enum {
     ADD,
     UNKNOWN
 };
+
+static char  *ft_strdup(char *string)
+{
+    char *copy;
+    int index = 0;
+
+    copy = malloc(strlen(string) + 1);
+    if (!copy)
+        return (NULL);
+    while (string[index])
+    {
+        copy[index] = string[index];
+        index++;
+    }
+    return (copy);
+}
 
 int get_command(char *command)
 {
@@ -24,9 +41,52 @@ int get_command(char *command)
     return UNKNOWN;
 }
 
+/* add 12345|978-2-12345680-3|El Quijote|catedra */
 char    *add_element(char *input)
 {
-    printf("Añadiendo elemento...\n");
+    Element *element;
+    char    *string;
+
+    element = createElement();
+    if (!element)
+        return (NULL);
+    
+    /* bookID */
+    string = strtok(input, "|");
+    element->index.key = atoi(string);
+
+    /* ISBN */
+    string = strtok(NULL, "|");
+    if (strlen(string) > ISBN_LENGTH)
+    {
+        printf("Error de formato.\n");
+        deleteElement(element);
+        return NULL;
+    }
+    strcpy(element->isbn, string);
+
+    /* Title */
+    string = strtok(NULL, "|");
+    if (strlen(string) > MAX_LENGTH)
+    {
+        printf("Error de formato.\n");
+        deleteElement(element);
+        return NULL;
+    }
+    element->title = ft_strdup(string);
+
+    /* printedBy */
+    string = strtok(NULL, "\0");
+    if (strlen(string) > MAX_LENGTH)
+    {
+        printf("Error de formato.\n");
+        deleteElement(element);
+        return NULL;
+    }
+    element->printedBy = ft_strdup(string);
+
+    printElement(element);
+
     return (NULL);
 }
 
