@@ -55,5 +55,4 @@ Element	**addDatabaseElement(Element **database, Element *element);
 */
 void    save_database(Element **database, char *filename);
 
-
 #endif
