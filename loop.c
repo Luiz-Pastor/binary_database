@@ -42,7 +42,7 @@ int get_command(char *command)
 }
 
 /* add 12345|978-2-12345680-3|El Quijote|catedra */
-char    *add_element(char *input)
+char    *add_element(char *input, Database *database)
 {
     Element *element;
     char    *string;
@@ -84,13 +84,14 @@ char    *add_element(char *input)
         return NULL;
     }
     element->printedBy = ft_strdup(string);
+    element->index.size = 20 + strlen(element->title) + strlen(element->printedBy) + 1;
 
     printElement(element);
 
     return (NULL);
 }
 
-void    take_commands(Element **database)
+void    take_commands(Database *database)
 {
     char    input[1025] = "";
     char    *cmd;
@@ -113,7 +114,7 @@ void    take_commands(Element **database)
                 return ;
                 break;
             case ADD:
-                add_element(arguments);
+                add_element(arguments, database);
                 break;
             case UNKNOWN:
                 printf("Unrecognized command\n");
