@@ -20,9 +20,9 @@ OBJ=$(SRC:%.c=%.o)
 
 all: $(NAME)
 
-$(NAME): $(OBJ)
+$(NAME): $(OBJ) restart
 	@echo "$(C_BLUE)Compiling proyect...$(C_CLEAR)"
-	@$(CC) $^ -o $(NAME)
+	@$(CC) $(OBJ) -o $(NAME)
 	@echo "$(C_GREEN)Compiled!$(C_CLEAR)"
 
 %.o: %.c
@@ -40,6 +40,9 @@ valgrind: $(NAME)
 	@valgrind -s --leak-check=full ./$(NAME) best_fit data.db
 ##############################################
 
+restart:
+	@cp tests/data.db .
+
 clean:
 	@rm -rf $(OBJ)
 
@@ -48,4 +51,5 @@ fclean: clean
 
 re: fclean $(NAME)
 
+.PHONY: clean fclean re restart
 ##############################################
