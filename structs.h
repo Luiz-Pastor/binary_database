@@ -26,4 +26,12 @@ typedef struct {
     Element **elements;
 } Database;
 
+
+enum {
+    OK = 0,
+    REPEATED_ELEMENT,
+    MEMORY_ERROR,
+    BAD_FORMAT
+};
+
 #endif
