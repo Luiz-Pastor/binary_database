@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "element.h"
+#include "database.h"
 #include "loop.h"
 
 enum {
@@ -41,15 +42,19 @@ int get_command(char *command)
     return UNKNOWN;
 }
 
-/* add 12345|978-2-12345680-3|El Quijote|catedra */
-char    *add_element(char *input, Database *database)
+/*
+- Repetido:     add 12345|978-2-12345680-3|El Quijote|catedra
+- No repetido:  add 99999|978-2-12345680-3|El Quijote|catedra
+_ Bad format:   add 99998|978-2-12345683|El Quijote|catedra
+*/
+int add_element(char *input, Database *database)
 {
     Element *element;
     char    *string;
 
     element = createElement();
     if (!element)
-        return (NULL);
+        return (MEMORY_ERROR);
     
     /* bookID */
     string = strtok(input, "|");
@@ -57,11 +62,10 @@ char    *add_element(char *input, Database *database)
 
     /* ISBN */
     string = strtok(NULL, "|");
-    if (strlen(string) > ISBN_LENGTH)
+    if (strlen(string) != ISBN_LENGTH)
     {
-        printf("Error de formato.\n");
         deleteElement(element);
-        return NULL;
+        return BAD_FORMAT;
     }
     strcpy(element->isbn, string);
 
@@ -69,9 +73,8 @@ char    *add_element(char *input, Database *database)
     string = strtok(NULL, "|");
     if (strlen(string) > MAX_LENGTH)
     {
-        printf("Error de formato.\n");
         deleteElement(element);
-        return NULL;
+        return BAD_FORMAT;
     }
     element->title = ft_strdup(string);
 
@@ -79,24 +82,26 @@ char    *add_element(char *input, Database *database)
     string = strtok(NULL, "\0");
     if (strlen(string) > MAX_LENGTH)
     {
-        printf("Error de formato.\n");
         deleteElement(element);
-        return NULL;
+        return BAD_FORMAT;
     }
     element->printedBy = ft_strdup(string);
     element->index.size = 20 + strlen(element->title) + strlen(element->printedBy) + 1;
 
-    printElement(element);
+    if (addDatabaseElement(database, element))
+        return REPEATED_ELEMENT;
 
-    return (NULL);
+    return (OK);
 }
 
 void    take_commands(Database *database)
 {
     char    input[1025] = "";
     char    *cmd;
+    int     command;
     char    *arguments;
-    int command;
+
+    Element *last_element;
 
     while (1)
     {
@@ -107,6 +112,7 @@ void    take_commands(Database *database)
         cmd = strtok(input, " ");
         arguments = strtok(NULL, "\0");
 
+        /* Ejecutamos la acción del comando */
         command = get_command(cmd);
         switch (command)
         {
@@ -114,11 +120,26 @@ void    take_commands(Database *database)
                 return ;
                 break;
             case ADD:
-                add_element(arguments, database);
+                switch (add_element(arguments, database))
+                {
+                    case OK:
+                        last_element = getLastElement(database);
+                        printf("Record with BookID=%d has been added to the database\n", last_element->index.key);
+                        break;
+                    case REPEATED_ELEMENT:
+                        arguments = strtok(arguments, "|");
+                        printf("Record with BookID=%s exists\n", arguments);
+                        break;
+                    case MEMORY_ERROR:
+                        printf("Memory error!");
+                        return ;
+                    case BAD_FORMAT:
+                        printf("Bad expression format\n");
+                        break;
+                }
                 break;
             case UNKNOWN:
                 printf("Unrecognized command\n");
-                break;
             default:
                 break;
         }
