@@ -85,6 +85,7 @@ Database *read_database(char *filename)
     char    letter[2];			/* Usado para leer poco a poco el titulo */
     char    text[MAX_LENGTH];	/* Almacenamiento temporal del titulo. Optimización de espacio */
     int     count;				/* Espacio para el campo `printedBy`*/
+    int     exists;
 
 	/* Abrimos el archivo sobre el que vamos a leer */
     file = fopen(filename, "rb");
@@ -169,16 +170,17 @@ Database *read_database(char *filename)
         offset += current->index.size +  strlen(current->printedBy) + 1;
 
         /* Añadimos un elemento a la base de datos y lo metemos, añadiendo un NULL al final para iterar */
-        /*memory = (Element **) realloc(elements, (database_size + 1) * sizeof(Element *));
-        if (!memory)
-			return (error_reading(current, elements, &file));
-		elements = memory;
-        elements[database_size - 1] = current;
-    	elements[database_size] = NULL;
-        database_size++;*/
-        database = addDatabaseElement(database, current);
-        if (!database)
+        exists = addDatabaseElement(database, current);
+        if (exists == REPEATED_ELEMENT)
+        {
+            printf("There is a some elements with the same bookID!\n");
             return (error_reading(current, NULL, &file));
+        }
+        else if (exists == MEMORY_ERROR)
+        {
+            printf("Memory Error\n");
+            exit(0);
+        }
     }
 
     fclose(file);
@@ -225,19 +227,22 @@ size_t	databaseLength(Database *database)
 }
 
 /* Function that adds a block to the database */
-Database    *addDatabaseElement(Database *database, Element *element)
+int addDatabaseElement(Database *database, Element *element)
 {
 	Element	**memory;
 	size_t	size;
 
     if (!database || !element)
-		return (NULL);
+		return (0);
 	size = databaseLength(database);
     if (size == database->size)
     {
         memory = realloc(database->elements, (database->size * database->size + 1) * sizeof(Database));
         if (!memory)
-            return (free_database(database));
+        {
+            printf("Memory error!\n");
+            exit(MEMORY_ERROR);
+        }
         database->elements = memory;
         database->size *= database->size;
         database->elements[size++] = element;
@@ -249,15 +254,8 @@ Database    *addDatabaseElement(Database *database, Element *element)
         database->elements[size] = element;
         database->elements[size + 1] = NULL;
     }
-    
-	/*memory = (Element **) realloc(database, size + 2);
-	if (!memory)
-		return (NULL);
-	database = memory;
-	database[size + 1] = element;
-	database[size + 2] = NULL;
-	element->index.offset = database[size]->index.size +  strlen(database[size]->printedBy) + 1;*/
-	return database;
+
+	return OK;
 }
 
 /* Function that saves the database information in a file */
@@ -286,4 +284,17 @@ void    save_database(Database *database, char *filename)
 		index++;
 	}
 	fclose(file);
+}
+
+Element *getLastElement(Database *database)
+{
+    int index = 0;
+
+    if (!database || !database->elements)
+        return NULL;
+    while (database->elements[index])
+        index++;
+    if (index - 1 < 0)
+        return NULL;
+    return database->elements[index - 1];
 }

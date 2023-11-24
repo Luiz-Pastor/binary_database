@@ -44,9 +44,10 @@ size_t	databaseLength(Database *database);
  * 
  * @param	database Database to add the item to.
  * 
- * @return	A pointer to the database, or NULL if there is a memory problem.
+ * @return	1 if `element` has been added correctly, 0 if the element
+ * 			(bookID) exists
 */
-Database    *addDatabaseElement(Database *database, Element *element);
+int addDatabaseElement(Database *database, Element *element);
 
 /*
  * @brief	Function that saves the database information in a file.
@@ -55,5 +56,7 @@ Database    *addDatabaseElement(Database *database, Element *element);
  * @param	filename Name of the file where the information will be saved.
 */
 void    save_database(Database *database, char *filename);
+
+Element *getLastElement(Database *database);
 
 #endif
