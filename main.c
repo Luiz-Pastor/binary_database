@@ -51,10 +51,10 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    printDatabase(database);    
-
     /* TODO: Read the user commands */
     take_commands(database);
+
+    printDatabase(database);
 
     /* Save all the information in the database file */
     save_database(database, argv[2]);
