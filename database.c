@@ -38,26 +38,45 @@ static int  number_length(int number)
  * 
  * @return	NULL.
 */
-static void	*error_reading(Element *element, Element **database, FILE **file)
+static void	*error_reading(Element *element, Database *database, FILE **file)
 {
 	if (element)
 		deleteElement(element);
 	if (database)
-		free_database(database);
-	fclose(*file);
+        free_database(database);
+    if (file)
+	    fclose(*file);
 	return (NULL);
 }
 
 /* =========================================*/
 
+static Database *initDatabase()
+{
+    Database *database;
+
+    database = malloc(sizeof(Database));
+    if (!database)
+        return (NULL);
+    database->size = 2;
+    database->elements = calloc(3, sizeof(Element*));
+    if (!database->elements)
+    {
+        free(database);
+        return (NULL);
+    }
+    return (database);
+}
+
+
 /* Function that is responsible for reading a database through a binary file */
-Element **read_database(char *filename)
+Database *read_database(char *filename)
 {
     FILE    *file;				/* Archivo del que leer */
-    Element *element;			/* Elemento que se crea */
-    Element **database;			/* Database */
-    Element **memory;			/* Puntero auxiliar para realloc */
-    int     database_size = 1;	/* Tamaño de la base de datos + 1 (NULL)*/
+    Element *current;			/* Elemento que se crea */
+    /*Element **memory;*/			/* Puntero auxiliar para realloc */
+    Database    *database;
+    /*int     database_size = 1;*/	/* Tamaño de la base de datos + 1 (NULL)*/
 
     /* Variables auxiliares */
     int     i;					/* Iterador del bucle*/
@@ -72,8 +91,7 @@ Element **read_database(char *filename)
     if (!file)
         return (NULL);
 
-	/* Creamos la base de datos*/
-    database = (Element **) malloc(sizeof(Element *));
+    database = initDatabase();
     if (!database)
     {
         fclose(file);
@@ -88,33 +106,33 @@ Element **read_database(char *filename)
             text[i] = '\0';
 
         /* Creamos el nodo del elemento */
-        element = createElement();
-        if (!element)
-			return (error_reading(element, database, &file));
+        current = createElement();
+        if (!current)
+			return (error_reading(current, database, &file));
 
         /* Fijamos el offset */
-        element->index.offset = offset;
+        current->index.offset = offset;
 
         /* Guardamos el tamaño del bloque */
-        readed = fread(&(element->index.size), sizeof(size_t), 1, file);
+        readed = fread(&(current->index.size), sizeof(size_t), 1, file);
         if (feof(file))
         {
-            deleteElement(element);
+            deleteElement(current);
             break;
         }
 		if (!readed)
-			return (error_reading(element, database, &file));
+			return (error_reading(current, database, &file));
 
         /* Guardamos el bookId */
-        readed = fread(&(element->index.key), sizeof(int), 1, file);
+        readed = fread(&(current->index.key), sizeof(int), 1, file);
 		if (!readed)
-			return (error_reading(element, database, &file));
+			return (error_reading(current, database, &file));
 
         /* Guardamos el ISBN */
-        readed = fread(element->isbn, sizeof(char), ISBN_LENGTH, file);
+        readed = fread(current->isbn, sizeof(char), ISBN_LENGTH, file);
 		if (!readed)
-			return (error_reading(element, database, &file));
-        element->isbn[ISBN_LENGTH] = '\0';
+			return (error_reading(current, database, &file));
+        current->isbn[ISBN_LENGTH] = '\0';
 
         /*
             Guardamos todo en una variable auxiliar, hasta encontrar un '|' (fin del titulo).
@@ -124,104 +142,126 @@ Element **read_database(char *filename)
         do{
             readed = fread(letter, sizeof(char), 1, file);
 			if (!readed)
-				return (error_reading(element, database, &file));
+				return (error_reading(current, database, &file));
             letter[1] = '\0';
             if (letter[0] != '|')
                 strcat(text, letter);
         } while (letter[0] != '|');
 
-        element->title = calloc(strlen(text) + 1, sizeof(char));
-        if (!(element->title))
-            return (error_reading(element, database, &file));
-        strcpy(element->title, text);
+        current->title = calloc(strlen(text) + 1, sizeof(char));
+        if (!(current->title))
+            return (error_reading(current, database, &file));
+        strcpy(current->title, text);
     
         /*
             Calculamos cuantos caracteres nos quedan por leer, y leemos esa cantidad.
             Todo ello forma parte del campo 'printedBy'
         */
-        count = (element->index.size) - number_length(element->index.key) - strlen(element->isbn) - strlen(element->title);
-        element->printedBy = calloc(count + 1, sizeof(char));
-        if (!(element->printedBy))
-            return (error_reading(element, database, &file));
-        readed = fread(element->printedBy, sizeof(char), count, file);
+        count = (current->index.size) - number_length(current->index.key) - strlen(current->isbn) - strlen(current->title);
+        current->printedBy = calloc(count + 1, sizeof(char));
+        if (!(current->printedBy))
+            return (error_reading(current, database, &file));
+        readed = fread(current->printedBy, sizeof(char), count, file);
 		if (!readed)
-			return (error_reading(element, database, &file));
+			return (error_reading(current, database, &file));
 
         /* Calculamos el offset del siguiente elemento */
-        offset += element->index.size +  strlen(element->printedBy) + 1;
+        offset += current->index.size +  strlen(current->printedBy) + 1;
 
         /* Añadimos un elemento a la base de datos y lo metemos, añadiendo un NULL al final para iterar */
-        memory = (Element **) realloc(database, (database_size + 1) * sizeof(Element *));
+        /*memory = (Element **) realloc(elements, (database_size + 1) * sizeof(Element *));
         if (!memory)
-			return (error_reading(element, database, &file));
-		database = memory;
-        database[database_size - 1] = element;
-    	database[database_size] = NULL;
-        database_size++;
+			return (error_reading(current, elements, &file));
+		elements = memory;
+        elements[database_size - 1] = current;
+    	elements[database_size] = NULL;
+        database_size++;*/
+        database = addDatabaseElement(database, current);
+        if (!database)
+            return (error_reading(current, NULL, &file));
     }
+
     fclose(file);
     return (database);
 }
 
 /* Function that deletes a database (NULL-terminated) */
-void    *free_database(Element **database)
+void    *free_database(Database *database)
 {
     int index = 0;
 
 	if (!database)
 		return (NULL);
-    while (database[index])
-        deleteElement(database[index++]);
+    while (database->elements && database->elements[index])
+        deleteElement(database->elements[index++]);
+    free(database->elements);
     free(database);
     return (NULL);
 }
 
 /* Function that prints all the information of a database */
-void    printDatabase(Element **database)
+void    printDatabase(Database *database)
 {
     int index = 0;
 
 	printf("\n");
-    while (database[index])
+    while (database->elements[index])
     {
-        printElement(database[index++]);
+        printElement(database->elements[index++]);
         printf("\n\n");
     }
 }
 
 /* Function that obtains the number of blocks that a database has */
-size_t	databaseLength(Element **database)
+size_t	databaseLength(Database *database)
 {
 	size_t	size = 0;
 
-	if (!database)
+	if (!database || !database->elements)
 		return (0);
-	while (database[size])
+	while (database->elements[size])
 		size++;
 	return size;
 }
 
 /* Function that adds a block to the database */
-Element	**addDatabaseElement(Element **database, Element *element)
+Database    *addDatabaseElement(Database *database, Element *element)
 {
 	Element	**memory;
 	size_t	size;
 
-	if (!database || !element)
+    if (!database || !element)
 		return (NULL);
 	size = databaseLength(database);
-	memory = (Element **) realloc(database, size + 2);
+    if (size == database->size)
+    {
+        memory = realloc(database->elements, (database->size * database->size + 1) * sizeof(Database));
+        if (!memory)
+            return (free_database(database));
+        database->elements = memory;
+        database->size *= database->size;
+        database->elements[size++] = element;
+        while (size < database->size)
+            database->elements[size++] = NULL;
+    }
+    else
+    {
+        database->elements[size] = element;
+        database->elements[size + 1] = NULL;
+    }
+    
+	/*memory = (Element **) realloc(database, size + 2);
 	if (!memory)
 		return (NULL);
 	database = memory;
 	database[size + 1] = element;
 	database[size + 2] = NULL;
-	element->index.offset = database[size]->index.size +  strlen(database[size]->printedBy) + 1;
+	element->index.offset = database[size]->index.size +  strlen(database[size]->printedBy) + 1;*/
 	return database;
 }
 
 /* Function that saves the database information in a file */
-void    save_database(Element **database, char *filename)
+void    save_database(Database *database, char *filename)
 {
 	FILE	*file;
 	Element	*current;
@@ -234,9 +274,9 @@ void    save_database(Element **database, char *filename)
 	if (!file)
 		return ;
 
-	while (database[index])
+	while (database->elements[index])
 	{
-		current = database[index];
+		current = database->elements[index];
 		fwrite(&(current->index.size),	sizeof(size_t),	1,							file);
 		fwrite(&(current->index.key),	sizeof(int),	1,							file);
 		fwrite(&(current->isbn),		sizeof(char),	ISBN_LENGTH,				file);

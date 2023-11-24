@@ -9,9 +9,10 @@
  * 
  * @param 	filename Name of the file with the database.
  * 
- * @return	Array with all the elements of the database, NULL-terminated.
+ * @return	Database struct, with an array with all the elements of the database,
+ * 			NULL-terminated.
 */
-Element **read_database(char *filename);
+Database *read_database(char *filename);
 
 /*
  * @brief	Function that deletes a database (NULL-terminated).
@@ -20,14 +21,14 @@ Element **read_database(char *filename);
  * 
  * @return	NULL pointer.
 */
-void    *free_database(Element **database);
+void    *free_database(Database *database);
 
 /*
  * @brief	Function that prints all the information of a database.
  * 
  * @param	database The database with the info.
 */
-void    printDatabase(Element **database);
+void    printDatabase(Database *database);
 
 /*
  * @brief	Function that obtains the number of blocks that a database has.
@@ -36,7 +37,7 @@ void    printDatabase(Element **database);
  * 
  * @return	The number of elements in the database, or 0 if the database is NULL.
 */
-size_t	databaseLength(Element **database);
+size_t	databaseLength(Database *database);
 
 /*
  * @brief	Function that adds a block to the database.
@@ -45,7 +46,7 @@ size_t	databaseLength(Element **database);
  * 
  * @return	A pointer to the database, or NULL if there is a memory problem.
 */
-Element	**addDatabaseElement(Element **database, Element *element);
+Database    *addDatabaseElement(Database *database, Element *element);
 
 /*
  * @brief	Function that saves the database information in a file.
@@ -53,6 +54,6 @@ Element	**addDatabaseElement(Element **database, Element *element);
  * @param	database Database from which to extract information.
  * @param	filename Name of the file where the information will be saved.
 */
-void    save_database(Element **database, char *filename);
+void    save_database(Database *database, char *filename);
 
 #endif
