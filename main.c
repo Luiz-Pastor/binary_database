@@ -37,7 +37,7 @@ static int  check_arguments(int argc, char **argv)
 
 int main(int argc, char *argv[])
 {
-    Element **database;
+    Database    *database;
 
     /* Check arguments */
     if (!check_arguments(argc, argv))
