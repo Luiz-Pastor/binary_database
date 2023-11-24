@@ -58,5 +58,6 @@ int addDatabaseElement(Database *database, Element *element);
 void    save_database(Database *database, char *filename);
 
 Element *getLastElement(Database *database);
+Element *findDatabaseElement(Database *database, int key);
 
 #endif

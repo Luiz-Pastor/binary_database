@@ -173,7 +173,7 @@ Database *read_database(char *filename)
         exists = addDatabaseElement(database, current);
         if (exists == REPEATED_ELEMENT)
         {
-            printf("There is a some elements with the same bookID!\n");
+            printf("There is some elements with the same bookID!\n");
             return (error_reading(current, NULL, &file));
         }
         else if (exists == MEMORY_ERROR)
@@ -182,7 +182,6 @@ Database *read_database(char *filename)
             exit(0);
         }
     }
-
     fclose(file);
     return (database);
 }
@@ -215,7 +214,7 @@ void    printDatabase(Database *database)
 }
 
 /* Function that obtains the number of blocks that a database has */
-size_t	databaseLength(Database *database)
+size_t databaseLength(Database *database)
 {
 	size_t	size = 0;
 
@@ -233,7 +232,13 @@ int addDatabaseElement(Database *database, Element *element)
 	size_t	size;
 
     if (!database || !element)
-		return (0);
+		return (MEMORY_ERROR);
+
+    if (findDatabaseElement(database, element->index.key))
+    {
+        return (REPEATED_ELEMENT);
+    }
+
 	size = databaseLength(database);
     if (size == database->size)
     {
@@ -254,6 +259,10 @@ int addDatabaseElement(Database *database, Element *element)
         database->elements[size] = element;
         database->elements[size + 1] = NULL;
     }
+
+    /* TODO: ordenar la base de datos */
+
+    /* TODO: actualizar offset de cada elemento */
 
 	return OK;
 }
@@ -297,4 +306,39 @@ Element *getLastElement(Database *database)
     if (index - 1 < 0)
         return NULL;
     return database->elements[index - 1];
+}
+
+
+static Element* find_recursive(Database *database, int start, int end, int key)
+{
+    int mid;
+
+    if (start > end)
+        return NULL;
+
+    if (start == end)
+    {
+        if (database->elements[start]->index.key == key)
+            return (database->elements[start]);
+        else
+            return NULL;
+    }
+
+    mid = (end + start) / 2;
+    if (database->elements[mid]->index.key == key)
+        return database->elements[mid];
+
+    if (database->elements[mid]->index.key < key)
+        return find_recursive(database, mid + 1, end, key);
+    else
+        return find_recursive(database, start, mid, key);
+    return NULL;
+}
+
+Element *findDatabaseElement(Database *database, int key)
+{
+    if (!database)
+        return (NULL);
+
+    return find_recursive(database, 0, databaseLength(database) - 1, key);
 }
