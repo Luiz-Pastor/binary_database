@@ -21,30 +21,28 @@ static int  exit_error(char *program)
 
 static int  check_arguments(int argc, char **argv)
 {
-    FILE *file;
-
     if (argc != 3)
         return 0;
+
     if (strcmp(argv[1], "best_fit") && strcmp(argv[1], "first_fit") && strcmp(argv[1], "worst_fit"))
         return 0;
-
-    file = fopen(argv[2], "rb");
-    if (!file)
-        return (0);
-    fclose(file);
     return 1;
 }
 
 int main(int argc, char *argv[])
 {
     Database    *database;
+    char        filename[1024];
+
+    /* Guardamos el nombre del archivo que leer y escribir */
+    sprintf(filename, "%s.db", argv[2]);
 
     /* Check arguments */
     if (!check_arguments(argc, argv))
         return exit_error(argv[0]);
 
     /* Read all the info in the database */
-    database = read_database(argv[2]);
+    database = read_database(filename);
     if (!database)
     {
         printf("Error reading the database.\n");
@@ -57,7 +55,7 @@ int main(int argc, char *argv[])
     /* printDatabase(database); */
 
     /* Save all the information in the database file */
-    save_database(database, argv[2]);
+    save_database(database, filename);
 
     /* Free the memory */
     free_database(database); /* Una alternativa puede ser usar exit */
