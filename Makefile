@@ -30,11 +30,13 @@ $(NAME): $(OBJ) restart
 	@$(CC) $(CFLAGS) -c $<
 
 ##############################################
+DB_FILE=test
+
 run: $(NAME)
-	@./$(NAME) best_fit data.db
+	@./$(NAME) best_fit $(DB_FILE)
 
 rune: $(NAME)
-	@./$(NAME) best_fit data.db | cat -e
+	@./$(NAME) best_fit $(DB_FILE) | cat -e
 
 valgrind: $(NAME)
 	@valgrind -s --leak-check=full ./$(NAME) best_fit data.db
