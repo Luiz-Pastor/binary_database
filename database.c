@@ -68,24 +68,60 @@ static Database *initDatabase()
     return (database);
 }
 
+static void setOffset(Database *database)
+{
+    int i = 0, offset = 0;
+
+    if (!database)
+        return ;
+    while (database->elements[i])
+    {
+        database->elements[i]->index.offset = offset;
+        offset += database->elements[i]->index.size + strlen(database->elements[i]->printedBy) + 1;
+        i++;
+    }
+}
+
+static void shortDatabase(Database *database)
+{
+    int i, j, min, length = databaseLength(database);
+    Element *aux;
+
+    if (!database)
+        return ;
+    
+    for (i = 0; i < length; i++)
+    {
+        min = i;
+        for (j = i + 1; j < length; j++)
+        {
+            if (database->elements[j]->index.key < database->elements[min]->index.key)
+                min = j;
+        }
+        if (min != i)
+        {
+            aux = database->elements[i];
+            database->elements[i] = database->elements[min];
+            database->elements[min] = aux;
+        }
+    }
+    setOffset(database);
+}
 
 /* Function that is responsible for reading a database through a binary file */
 Database *read_database(char *filename)
 {
     FILE    *file;				/* Archivo del que leer */
     Element *current;			/* Elemento que se crea */
-    /*Element **memory;*/			/* Puntero auxiliar para realloc */
     Database    *database;
-    /*int     database_size = 1;*/	/* Tamaño de la base de datos + 1 (NULL)*/
 
     /* Variables auxiliares */
     int     i;					/* Iterador del bucle*/
 	int		readed;				/* Caracteres leidos. Usado para ver si falla la lectura*/
-    int     offset = 0;			/* Offset */
     char    letter[2];			/* Usado para leer poco a poco el titulo */
     char    text[MAX_LENGTH];	/* Almacenamiento temporal del titulo. Optimización de espacio */
     int     count;				/* Espacio para el campo `printedBy`*/
-    int     exists;
+    int     exists;             /* El elemento existe */
 
 	/* Abrimos el archivo sobre el que vamos a leer */
     file = fopen(filename, "rb");
@@ -110,9 +146,6 @@ Database *read_database(char *filename)
         current = createElement();
         if (!current)
 			return (error_reading(current, database, &file));
-
-        /* Fijamos el offset */
-        current->index.offset = offset;
 
         /* Guardamos el tamaño del bloque */
         readed = fread(&(current->index.size), sizeof(size_t), 1, file);
@@ -165,9 +198,6 @@ Database *read_database(char *filename)
         readed = fread(current->printedBy, sizeof(char), count, file);
 		if (!readed)
 			return (error_reading(current, database, &file));
-
-        /* Calculamos el offset del siguiente elemento */
-        offset += current->index.size +  strlen(current->printedBy) + 1;
 
         /* Añadimos un elemento a la base de datos y lo metemos, añadiendo un NULL al final para iterar */
         exists = addDatabaseElement(database, current);
@@ -260,9 +290,8 @@ int addDatabaseElement(Database *database, Element *element)
         database->elements[size + 1] = NULL;
     }
 
-    /* TODO: ordenar la base de datos */
-
-    /* TODO: actualizar offset de cada elemento */
+    /* Ordenamod la base de datos , y fijamos nuevos offsets */
+    shortDatabase(database);
 
 	return OK;
 }
@@ -307,7 +336,6 @@ Element *getLastElement(Database *database)
         return NULL;
     return database->elements[index - 1];
 }
-
 
 static Element* find_recursive(Database *database, int start, int end, int key)
 {
