@@ -48,7 +48,7 @@ static int get_command(char *command)
 
 /*
 - Repetido:     add 12345|978-2-12345680-3|El Quijote|catedra
-- No repetido:  add 99999|978-2-12345680-3|El Quijote|catedra
+- No repetido:  add 00001|978-2-12345680-3|El Quijote|catedra
 _ Bad format:   add 99998|978-2-12345683|El Quijote|catedra
 */
 static int add_element(char *input, Database *database)
@@ -141,6 +141,8 @@ void    take_commands(Database *database)
     char    *arguments;
 
     Element *element;
+
+    printf("Type command and argument/s.\n");
 
     while (1)
     {

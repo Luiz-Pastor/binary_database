@@ -24,7 +24,6 @@ Element *createElement()
 	return (element);
 }
 
-
 void	deleteElement(Element *element)
 {
 	if (!element)
