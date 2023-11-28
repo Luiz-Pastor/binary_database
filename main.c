@@ -12,20 +12,28 @@ TODO:
     - Guardar todos los cambios que se hayan hecho en el programa
     - Liberar memoria
 */
-static int  exit_error(char *program)
+
+/*static int  print_help(char *program)
 {
     printf("Error. Usage: %s <insertion_mode> <database_file>.\n", program);
     printf("Posible insertion modes:\n\t·best_fit\n\t·first_mode\n\t·worst_mode\n");
     return (1);
-}
+}*/
 
 static int  check_arguments(int argc, char **argv)
 {
+
     if (argc != 3)
-        return 0;
+    {
+        printf("Missing argument\n");
+        return (0);
+    }
 
     if (strcmp(argv[1], "best_fit") && strcmp(argv[1], "first_fit") && strcmp(argv[1], "worst_fit"))
+    {
+        printf("Unknown search strategy unknown_search_strategy\n");
         return 0;
+    }
     return 1;
 }
 
@@ -34,12 +42,12 @@ int main(int argc, char *argv[])
     Database    *database;
     char        filename[1024];
 
-    /* Guardamos el nombre del archivo que leer y escribir */
-    sprintf(filename, "%s.db", argv[2]);
-
     /* Check arguments */
     if (!check_arguments(argc, argv))
-        return exit_error(argv[0]);
+        return (1);
+
+    /* Guardamos el nombre del archivo que leer y escribir */
+    sprintf(filename, "%s.db", argv[2]);
 
     /* Read all the info in the database */
     database = read_database(filename);
