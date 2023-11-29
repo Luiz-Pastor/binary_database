@@ -123,16 +123,17 @@ Database *read_database(char *filename)
     int     count;				/* Espacio para el campo `printedBy`*/
     int     exists;             /* El elemento existe */
 
+    database = initDatabase();
+    if (!database)
+        return (NULL);
+
 	/* Abrimos el archivo sobre el que vamos a leer */
     file = fopen(filename, "rb");
     if (!file)
-        return (NULL);
-
-    database = initDatabase();
-    if (!database)
     {
+        file = fopen(filename, "w");
         fclose(file);
-        return (NULL);
+        return (database);
     }
 
 	/* Vamos guardando cada elemento */
