@@ -20,7 +20,7 @@ OBJ=$(SRC:%.c=%.o)
 
 all: $(NAME)
 
-$(NAME): $(OBJ) restart
+$(NAME): $(OBJ)
 	@echo "$(C_BLUE)Compiling proyect...$(C_CLEAR)"
 	@$(CC) $(OBJ) -o $(NAME)
 	@echo "$(C_GREEN)Compiled!$(C_CLEAR)"
@@ -30,20 +30,31 @@ $(NAME): $(OBJ) restart
 	@$(CC) $(CFLAGS) -c $<
 
 ##############################################
-DB_FILE=test
 
-run: $(NAME)
-	@./$(NAME) best_fit $(DB_FILE)
+test:
+	@echo "\n$(C_RED)@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@$(C_CLEAR)"
 
-rune: $(NAME)
-	@./$(NAME) best_fit $(DB_FILE) | cat -e
+# Primer test
+	@echo "\n\t\t$(C_GREEN)####################$(C_CLEAR)"
+	@echo "\t\t$(C_GREEN)# $(C_YELLOW)add_data_test.sh $(C_GREEN)#$(C_CLEAR)"
+	@echo "\t\t$(C_GREEN)####################$(C_CLEAR)"
+	@./add_data_test.sh
 
-valgrind: $(NAME)
-	@valgrind -s --leak-check=full ./$(NAME) best_fit data.db
+# Segundo test
+	@echo "\n\n\t\t$(C_GREEN)################$(C_CLEAR)"
+	@echo "\t\t$(C_GREEN)# $(C_YELLOW)cli_tests.sh $(C_GREEN)#$(C_CLEAR)"
+	@echo "\t\t$(C_GREEN)################$(C_CLEAR)"
+	@./cli_tests.sh
+
+# Tercer test
+	@echo "\n\n\t\t$(C_GREEN)###################$(C_CLEAR)"
+	@echo "\t\t$(C_GREEN)# $(C_YELLOW)many_entries.sh $(C_GREEN)#$(C_CLEAR)"
+	@echo "\t\t$(C_GREEN)###################$(C_CLEAR)"
+	@./many_entries.sh
+
+	@echo "\n$(C_RED)@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@$(C_CLEAR)\n"
+
 ##############################################
-
-restart:
-	@cp tests/data.db .
 
 clean:
 	@rm -rf $(OBJ)
@@ -54,4 +65,5 @@ fclean: clean
 re: fclean $(NAME)
 
 .PHONY: clean fclean re restart
+
 ##############################################
