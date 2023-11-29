@@ -28,6 +28,7 @@ static char  *ft_strdup(char *string)
         copy[index] = string[index];
         index++;
     }
+    copy[index] = '\0';
     return (copy);
 }
 
