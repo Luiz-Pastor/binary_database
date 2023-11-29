@@ -114,9 +114,9 @@ static void printIndex(Database *database)
     while (database->elements[index])
     {
         printf("Entry #%d\n", index);
-        printf("\tkey: #%d\n", database->elements[index]->index.key);
-        printf("\toffset: #%ld\n", database->elements[index]->index.offset);
-        printf("\tsize: #%ld\n", database->elements[index]->index.size);
+        printf("    key: #%d\n", database->elements[index]->index.key);
+        printf("    offset: #%ld\n", database->elements[index]->index.offset);
+        printf("    size: #%ld\n", database->elements[index]->index.size);
         index++;
     }
 }
@@ -143,7 +143,7 @@ void    take_commands(Database *database)
 
     Element *element;
 
-    printf("Type command and argument/s.\n");
+    printf("Type command and argument/s.\nexit\n");
 
     while (1)
     {
@@ -209,6 +209,7 @@ void    take_commands(Database *database)
             default:
                 break;
         }
+        printf("exit\n");
     }
     return ;
 }

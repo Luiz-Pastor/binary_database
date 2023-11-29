@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 
     /* Check arguments */
     if (!check_arguments(argc, argv))
-        return (1);
+        return (0);
 
     /* Guardamos el nombre del archivo que leer y escribir */
     sprintf(filename, "%s.db", argv[2]);
