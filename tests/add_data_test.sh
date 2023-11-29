@@ -5,7 +5,7 @@
 # first test
 set timeout -1
 set filename "test"
-set programName "./library"
+set programName "library"
 
 # delete all files starting with $filename
 spawn rm -f $filename.db $filename.ind
