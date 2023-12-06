@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include "element.h"
 
+/*
+ * Function that created an empty element
+*/
 Element *createElement()
 {
 	int		i;
@@ -26,6 +29,9 @@ Element *createElement()
 	return (element);
 }
 
+/*
+ * Function that cleans the information of an element
+*/
 void	cleanElement(Element *element)
 {
 	if (!element)
@@ -43,6 +49,9 @@ void	cleanElement(Element *element)
 	element->printedBy = NULL;
 }
 
+/*
+ * Function that deletes an element
+*/
 void	deleteElement(Element *element)
 {
 	if (!element)
@@ -52,11 +61,14 @@ void	deleteElement(Element *element)
 	free(element);
 }
 
+/*
+ * Function that prints the information of an element
+*/
 void	printElement(Element *element)
 {
-    printf("Tamano del bloque: %ld (offset: %ld)\n", element->index.size, element->index.offset);
-    printf("\tBookID:\t\t%d\n", element->index.key);
-    printf("\tIDBN:\t\t%s\n", element->isbn);
-    printf("\tTitle:\t\t%s\n", element->title);
-    printf("\tEditorial:\t%s\n", element->printedBy);
+	printf("Tamano del bloque: %ld (offset: %ld)\n", element->index.size, element->index.offset);
+	printf("\tBookID:\t\t%d\n", element->index.key);
+	printf("\tIDBN:\t\t%s\n", element->isbn);
+	printf("\tTitle:\t\t%s\n", element->title);
+	printf("\tEditorial:\t%s\n", element->printedBy);
 }
