@@ -1,3 +1,4 @@
 *.o
 library
 test.db
+test_control.db
