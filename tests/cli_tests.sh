@@ -19,7 +19,7 @@ set output "init"
 
 # no arguments
 try {
-set output [exec ./$programName]
+set output [exec ../$programName]
 } trap CHILDSTATUS {} {}
 if {[regexp -nocase $noArguments $output]} {
     puts "1) Command line error handling: No arguments ;-)"
@@ -29,7 +29,7 @@ if {[regexp -nocase $noArguments $output]} {
 
 # no valid search strategy
 try {
-set output [exec ./$programName unknown_search_strategy tests]
+set output [exec ../$programName unknown_search_strategy tests]
 } trap CHILDSTATUS {} {}
 if {[regexp -nocase $wrongStrategy $output]} {
     puts "2) Command line error handling: Bad strategy ;-)"
