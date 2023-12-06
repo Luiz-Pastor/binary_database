@@ -38,19 +38,19 @@ test: all
 	@echo "\n\t\t$(C_GREEN)####################$(C_CLEAR)"
 	@echo "\t\t$(C_GREEN)# $(C_YELLOW)add_data_test.sh $(C_GREEN)#$(C_CLEAR)"
 	@echo "\t\t$(C_GREEN)####################$(C_CLEAR)"
-	@./add_data_test.sh
+	@./tests/add_data_test.sh
 
 # Segundo test
 	@echo "\n\n\t\t$(C_GREEN)################$(C_CLEAR)"
 	@echo "\t\t$(C_GREEN)# $(C_YELLOW)cli_tests.sh $(C_GREEN)#$(C_CLEAR)"
 	@echo "\t\t$(C_GREEN)################$(C_CLEAR)"
-	@./cli_tests.sh
+	@./tests/cli_tests.sh
 
 # Tercer test
 	@echo "\n\n\t\t$(C_GREEN)###################$(C_CLEAR)"
 	@echo "\t\t$(C_GREEN)# $(C_YELLOW)many_entries.sh $(C_GREEN)#$(C_CLEAR)"
 	@echo "\t\t$(C_GREEN)###################$(C_CLEAR)"
-	@./many_entries.sh
+	@./tests/many_entries.sh
 
 	@echo "\n$(C_RED)@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@$(C_CLEAR)\n"
 
