@@ -11,6 +11,8 @@ Element *createElement()
 	if (!element)
 		return (NULL);
 
+	element->using = 1;
+
 	element->title = NULL;
 	element->printedBy = NULL;
 
@@ -24,15 +26,29 @@ Element *createElement()
 	return (element);
 }
 
+void	cleanElement(Element *element)
+{
+	if (!element)
+		return ;
+
+	element->using = 0;
+
+	element->index.key = 0;
+
+	if (element->title)
+		free(element->title);
+	element->title = NULL;
+	if (element->printedBy)
+		free(element->printedBy);
+	element->printedBy = NULL;
+}
+
 void	deleteElement(Element *element)
 {
 	if (!element)
 		return;
 
-	if (element->title)
-		free(element->title);
-	if (element->printedBy)
-		free(element->printedBy);
+	cleanElement(element);
 	free(element);
 }
 
