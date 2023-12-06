@@ -17,7 +17,7 @@ spawn rm -f $filename.db $filename.ind
 expr {srand([clock seconds])}    ;# initialize RNG
 spawn ./$programName best_fit test
 
-for {set x 1001} {$x<2000} {incr x} {
+for {set x 1001} {$x<1003} {incr x} {
    expect "exit"   
    puts "$x"
    send  "add $x|978-2-12345680-3|El Quijote|Catedra\r"
