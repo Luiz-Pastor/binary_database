@@ -8,32 +8,32 @@
 # define MAX_LENGTH 128
 
 typedef struct {
-    int         key;    /* Book bookID */
-    long int    offset; /*Book is stored in disk at this position */
-    size_t      size;   /* Book record size. This is a redundant field that helps in the implementation */
+	int			key;    /* Book bookID */
+	long int	offset; /*Book is stored in disk at this position */
+	size_t		size;   /* Book record size. This is a redundant field that helps in the implementation */
 } indexbook;
 
 
 typedef struct {
-    int         using;
-    indexbook   index;
-    char        isbn[ISBN_LENGTH + 1];
-    char        *title;        /* Tamaño variable, máximo de `MAX_LENGTH`*/
-    char        *printedBy;    /* Tamaño variable, máximo de `MAX_LENGTH`*/
+	int			using;
+	indexbook	index;
+	char		isbn[ISBN_LENGTH + 1];
+	char		*title;        /* Tamaño variable, máximo de `MAX_LENGTH`*/
+	char		*printedBy;    /* Tamaño variable, máximo de `MAX_LENGTH`*/
 } Element;
 
 typedef struct {
-    int size;
-    Element **elements;
+	int		size;
+	Element	**elements;
 } Database;
 
 
 enum {
-    OK = 0,
-    REPEATED_ELEMENT,
-    MEMORY_ERROR,
-    BAD_FORMAT,
-    ERROR
+	OK = 0,
+	REPEATED_ELEMENT,
+	MEMORY_ERROR,
+	BAD_FORMAT,
+	ERROR
 };
 
 #endif

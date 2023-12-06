@@ -8,7 +8,7 @@
  * 
  * @return	The empty element created, or NULL if there is a memory problem
 */
-Element *createElement();
+Element	*createElement();
 
 /*
  * @brief	Function that performs all the information about an element,

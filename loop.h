@@ -3,6 +3,6 @@
 
 # include "structs.h"
 
-void    take_commands(Database *database);
+void	take_commands(Database *database);
 
 #endif

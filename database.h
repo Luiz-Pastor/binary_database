@@ -28,7 +28,7 @@ void		*free_database(Database *database);
  * 
  * @param	database The database with the info.
 */
-void    	printDatabase(Database *database);
+void		printDatabase(Database *database);
 
 /*
  * @brief	Function that obtains the number of blocks that a database has.
@@ -47,7 +47,7 @@ size_t		databaseLength(Database *database);
  * @return	1 if `element` has been added correctly, 0 if the element
  * 			(bookID) exists
 */
-int 		addDatabaseElement(Database *database, Element *element);
+int			addDatabaseElement(Database *database, Element *element);
 
 /*
  * @brief	Function that saves the database information in a file.
@@ -55,7 +55,7 @@ int 		addDatabaseElement(Database *database, Element *element);
  * @param	database Database from which to extract information.
  * @param	filename Name of the file where the information will be saved.
 */
-void    	save_database(Database *database, char *filename);
+void		save_database(Database *database, char *filename);
 
 /*
  * @brief	Function that returns the last element of the database.
@@ -64,7 +64,7 @@ void    	save_database(Database *database, char *filename);
  * 
  * @return	The last element, or NULL if it does not exist.
 */
-Element 	*getLastElement(Database *database);
+Element		*getLastElement(Database *database);
 
 /*
  * @brief	Function that find a register with a specific bookID.
@@ -74,6 +74,6 @@ Element 	*getLastElement(Database *database);
  * 
  * @return	The element, or NULL if it does not exist.
 */
-Element 	*findDatabaseElement(Database *database, int key);
+Element		*findDatabaseElement(Database *database, int key);
 
 #endif

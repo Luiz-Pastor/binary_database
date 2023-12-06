@@ -18,7 +18,8 @@
 */
 static int      number_length(int number)
 {
-	int count = 0;
+	int	count = 0;
+
 	if (number == 0)
 		return (1);
 	while (number != 0)
@@ -58,7 +59,7 @@ static void     *error_reading(Element *element, Database *database, FILE **file
 */
 static Database *initDatabase()
 {
-	Database *database;
+	Database	*database;
 
 	database = malloc(sizeof(Database));
 	if (!database)
@@ -78,17 +79,17 @@ static Database *initDatabase()
 */
 Database        *read_database(char *filename)
 {
-	FILE    *file;				/* Archivo del que leer */
-	Element *current;			/* Elemento que se crea */
-	Database    *database;
+	FILE		*file;				/* Archivo del que leer */
+	Element		*current;			/* Elemento que se crea */
+	Database	*database;
 
 	/* Variables auxiliares */
-	int     i;					/* Iterador del bucle*/
-	int		readed;				/* Caracteres leidos. Usado para ver si falla la lectura*/
-	char    letter[2];			/* Usado para leer poco a poco el titulo */
-	char    text[MAX_LENGTH];	/* Almacenamiento temporal del titulo. Optimización de espacio */
-	int     count;				/* Espacio para el campo `printedBy`*/
-	int     exists;             /* El elemento existe */
+	int			i;					/* Iterador del bucle*/
+	int			readed;				/* Caracteres leidos. Usado para ver si falla la lectura*/
+	char		letter[2];			/* Usado para leer poco a poco el titulo */
+	char		text[MAX_LENGTH];	/* Almacenamiento temporal del titulo. Optimización de espacio */
+	int			count;				/* Espacio para el campo `printedBy`*/
+	int			exists;             /* El elemento existe */
 
 	database = initDatabase();
 	if (!database)
@@ -193,7 +194,7 @@ Database        *read_database(char *filename)
 */
 void    *free_database(Database *database)
 {
-	int index = 0;
+	int	index = 0;
 
 	if (!database)
 		return (NULL);
@@ -213,7 +214,7 @@ void    *free_database(Database *database)
 */
 void    printDatabase(Database *database)
 {
-	int index = 0;
+	int	index = 0;
 
 	printf("\n");
 	while (database->elements[index])
@@ -252,7 +253,7 @@ size_t  databaseLength(Database *database)
 */
 static void setOffset(Database *database)
 {
-	int i = 0, offset = 0;
+	int	i = 0, offset = 0;
 
 	if (!database)
 		return ;
@@ -271,12 +272,13 @@ static void setOffset(Database *database)
 */
 static void shortDatabase(Database *database)
 {
-	int i, j, min, length = databaseLength(database);
-	Element *aux;
+	int		i, j, min, length;
+	Element	*aux;
 
 	if (!database)
 		return ;
 	
+	length = databaseLength(database);
 	for (i = 0; i < length; i++)
 	{
 		min = i;
@@ -386,7 +388,7 @@ void    save_database(Database *database, char *filename)
 */
 Element *getLastElement(Database *database)
 {
-	int index = 0;
+	int	index = 0;
 
 	if (!database || !database->elements)
 		return NULL;
@@ -414,7 +416,7 @@ Element *getLastElement(Database *database)
 */
 static Element* find_recursive(Database *database, int start, int end, int key)
 {
-	int mid;
+	int	mid;
 
 	if (start > end)
 		return NULL;
