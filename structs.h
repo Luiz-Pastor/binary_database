@@ -15,6 +15,7 @@ typedef struct {
 
 
 typedef struct {
+    int         using;
     indexbook   index;
     char        isbn[ISBN_LENGTH + 1];
     char        *title;        /* Tamaño variable, máximo de `MAX_LENGTH`*/
@@ -31,7 +32,8 @@ enum {
     OK = 0,
     REPEATED_ELEMENT,
     MEMORY_ERROR,
-    BAD_FORMAT
+    BAD_FORMAT,
+    ERROR
 };
 
 #endif
