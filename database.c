@@ -313,6 +313,11 @@ void    save_database(Database *database, char *filename)
 
 	while (database->elements[index])
 	{
+        if (!database->elements[index]->using)
+        {
+            index++;
+            continue ;
+        }
 		current = database->elements[index];
 		fwrite(&(current->index.size),	sizeof(size_t),	1,							file);
 		fwrite(&(current->index.key),	sizeof(int),	1,							file);

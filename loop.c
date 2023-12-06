@@ -12,6 +12,7 @@ enum {
     FIND,
     PRINTIND,
     PRINTREC,
+    DEL,
     UNKNOWN
 };
 
@@ -44,16 +45,19 @@ static int get_command(char *command)
         return (PRINTIND);
     else if (!strcmp(command, "printRec"))
         return (PRINTREC);
+    else if (!strcmp(command, "del"))
+        return (DEL);
     return UNKNOWN;
 }
 
-/*
-- Repetido:     add 12345|978-2-12345680-3|El Quijote|catedra
-- No repetido:  add 00001|978-2-12345680-3|El Quijote|catedra
-_ Bad format:   add 99998|978-2-12345683|El Quijote|catedra
-*/
-static int add_element(char *input, Database *database)
+static int command_add(char *input, Database *database)
 {
+    /*
+    - Repetido:     add 12345|978-2-12345680-3|El Quijote|catedra
+    - No repetido:  add 00001|978-2-12345680-3|El Quijote|catedra
+    - Bad format:   add 99998|978-2-12345683|El Quijote|catedra
+    */
+
     Element *element;
     char    *string;
 
@@ -99,7 +103,7 @@ static int add_element(char *input, Database *database)
     return (OK);
 }
 
-static Element* findElement(Database *database, char *input)
+static Element* command_find(Database *database, char *input)
 {
     int bookID;
 
@@ -107,21 +111,24 @@ static Element* findElement(Database *database, char *input)
     return findDatabaseElement(database, bookID);
 }
 
-static void printIndex(Database *database)
+static void command_printind(Database *database)
 {
     int index = 0;
 
     while (database->elements[index])
     {
-        printf("Entry #%d\n", index);
-        printf("    key: #%d\n", database->elements[index]->index.key);
-        printf("    offset: #%ld\n", database->elements[index]->index.offset);
-        printf("    size: #%ld\n", database->elements[index]->index.size);
+        if (database->elements[index]->using)
+        {
+            printf("Entry #%d\n", index);
+            printf("    key: #%d\n", database->elements[index]->index.key);
+            printf("    offset: #%ld\n", database->elements[index]->index.offset);
+            printf("    size: #%ld\n", database->elements[index]->index.size);
+        }
         index++;
     }
 }
 
-static void printAllElements(Database *database)
+static void command_printrec(Database *database)
 {
     int index = 0;
     Element *current;
@@ -132,6 +139,47 @@ static void printAllElements(Database *database)
         printf("%d|%s|%s|%s\n", current->index.key, current->isbn, current->title, current->printedBy);
         index++;
     }
+}
+
+static int command_del(Database *database, char *command)
+{
+    int     bookID, index = 0;
+    char    *copy, *first, *second;
+    Element *element;
+
+    copy = ft_strdup(command);
+
+    first = strtok(copy, " ");
+    second = strtok(NULL, "\0");
+
+    if (second)
+    {
+        free(copy);
+        return BAD_FORMAT;
+    }
+
+    while (first[index])
+    {
+        if (!isdigit(first[index]))
+        {
+            free(copy);
+            return BAD_FORMAT;
+        }
+        index++;
+    }
+
+    bookID = atoi(first);
+    element = findDatabaseElement(database, bookID);
+    if (!element)
+    {
+        free(copy);
+        return ERROR;
+    }
+    
+    cleanElement(element);
+
+    free(copy);
+    return OK;
 }
 
 void    take_commands(Database *database)
@@ -169,7 +217,7 @@ void    take_commands(Database *database)
                 break;
 
             case ADD:
-                switch (add_element(arguments, database))
+                switch (command_add(arguments, database))
                 {
                     case OK:
                         element = getLastElement(database);
@@ -189,7 +237,7 @@ void    take_commands(Database *database)
                 break;
 
             case FIND:
-                element = findElement(database, arguments);
+                element = command_find(database, arguments);
                 if (element)
                     printf("%d|%s|%s|%s\n", element->index.key, element->isbn, element->title, element->printedBy);
                 else
@@ -197,11 +245,26 @@ void    take_commands(Database *database)
                 break;
 
             case PRINTIND:
-                printIndex(database);
+                command_printind(database);
                 break;
 
             case PRINTREC:
-                printAllElements(database);
+                command_printrec(database);
+                break;
+
+            case DEL:
+                switch (command_del(database, arguments))
+                {
+                    case OK:
+                        printf("Record with bookId=%d has been deleted\n", atoi(arguments));
+                        break;
+                    case BAD_FORMAT:
+                        printf("Bad expression format\n");
+                        break;
+                    case ERROR:
+                        printf("Record with bookId=%d does not exist\n", atoi(arguments));
+                        break;
+                }
                 break;
 
             case UNKNOWN:
