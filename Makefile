@@ -73,7 +73,7 @@ env:
 	@cp tests/test_control.db .
 
 run: all
-	./library best_fit test_control
+	./library first_fit test_control
 
 valgrind: all
-	valgrind --leak-check=full ./library best_fit test_control
+	valgrind --leak-check=full ./library first_fit test_control
