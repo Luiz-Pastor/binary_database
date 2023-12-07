@@ -86,6 +86,25 @@ static Database *initDatabase(char *insertion)
 }
 
 /*
+ * @brief	Function that sets the offset corresponding to each element.
+ * 
+ * @param	database The database to change.
+*/
+static void setOffset(Database *database)
+{
+	int	i = 0, offset = 0;
+
+	if (!database)
+		return ;
+	while (database->elements[i])
+	{
+		database->elements[i]->index.offset = offset;
+		offset += database->elements[i]->index.size + strlen(database->elements[i]->printedBy) + 1;
+		i++;
+	}
+}
+
+/*
  * Function that is responsible for reading a database through a binary file
 */
 Database        *read_database(char *insertion, char *filename)
@@ -189,9 +208,10 @@ Database        *read_database(char *insertion, char *filename)
 		else if (exists == MEMORY_ERROR)
 		{
 			printf("Memory Error\n");
-			exit(0);
+			return (error_reading(current, NULL, &file));
 		}
 	}
+	setOffset(database);
 	fclose(file);
 	return (database);
 }
@@ -267,30 +287,11 @@ size_t  databaseLength(Database *database)
 /* =================================================================================== */
 
 /*
- * @brief	Function that sets the offset corresponding to each element.
- * 
- * @param	database The database to change.
-*/
-static void setOffset(Database *database)
-{
-	int	i = 0, offset = 0;
-
-	if (!database)
-		return ;
-	while (database->elements[i])
-	{
-		database->elements[i]->index.offset = offset;
-		offset += database->elements[i]->index.size + strlen(database->elements[i]->printedBy) + 1;
-		i++;
-	}
-}
-
-/*
  * @brief	Function to sort a database.
  * 
  * @param	database Database to sort.
 */
-static void shortDatabase(Database *database)
+/*static void shortDatabase(Database *database)
 {
 	int		i, j, min, length;
 	Element	*aux;
@@ -315,6 +316,107 @@ static void shortDatabase(Database *database)
 		}
 	}
 	setOffset(database);
+}*/
+
+static Database	*expand_database(Database *database, int count)
+{
+	size_t		size;
+	Element		**memory;
+
+	if (!database)
+		return NULL;
+
+	size = databaseLength(database);
+	if ((size + count) >= database->size)
+	{
+		memory = realloc(database->elements, (database->size * database->size + 1) * sizeof(Element*));
+
+		if (!memory)
+		{
+			free_database(database);
+			return NULL;
+		}
+		database->elements = memory;
+		database->size *= database->size;
+	}
+	return database;
+}
+
+static Database	*replace_empty_element(int index, Element *element, Database *database)
+{
+	int	new_size;
+	Element	*empty, *new_empty, *aux;
+
+	empty = database->elements[index];
+	if (!empty)
+	{
+		/* Se inserta el elemento al final de la base de datos. Expandimos la tabla un elemento */
+		database = expand_database(database, 1);
+		if (!database)
+			return NULL;
+
+		/* Ponemos el elemento en ultima posicion, y detras de él un NULL */
+		database->elements[index] = element;
+		database->elements[index + 1] = NULL;
+
+		if (index == 0)
+			element->index.offset = 0;
+		else
+			element->index.offset = database->elements[index - 1]->index.offset + database->elements[index - 1]->index.size + strlen(database->elements[index - 1]->printedBy) + 1;
+
+		return database;
+	}
+
+	/* Calculamos el espacio que va a tener el elemento sobrante que no se va a usar */
+	new_size = database->elements[index]->index.size - element->index.size;
+	if (new_size == 0)
+	{		
+		/* El elemento coincide justo con el espacio en blanco. Ponemos el elemento a meter */
+		database->elements[index] = element;
+
+		/* Cambiamos el offset al que tenia el elemento vacío */
+		element->index.offset = empty->index.offset;
+
+		/* Eliminamos el elemento vacío*/
+		deleteElement(empty);
+	}
+	else
+	{
+		/* Va a haber sobrante sin usar. Expandimos la tabla un elemento*/
+		database = expand_database(database, 1);
+		if (!database)
+			return NULL;
+		
+		/* Ponemos el offset al elemento a añadir */
+		element->index.offset = database->elements[index]->index.offset;
+
+		/* Creamos el bloque con el espacio sobrante */
+		new_empty = createElement();
+		if (!new_empty)
+			return NULL;
+
+		/* Le ponemos tamaño y offset al elemento vacío */
+		new_empty->using = 0;
+		new_empty->index.size = new_size;
+		new_empty->index.offset = database->elements[index]->index.size + strlen(database->elements[index]->printedBy) + 1;
+		
+		/* Eliminamos el previo elemento vacio  lo reemplazamos por la primera parte de los nuevos */
+		deleteElement(empty);
+		database->elements[index] = element;
+
+		/* Iteramos moviendo todos los elementos una posición a la derecha */
+		index++;
+		while (database->elements[index])
+		{
+			aux = database->elements[index];
+			database->elements[index] = new_empty;
+			new_empty = aux;
+			index++;
+		}
+		database->elements[index] = new_empty;
+		database->elements[index + 1] = NULL;
+	}
+	return database;
 }
 
 /*
@@ -322,40 +424,39 @@ static void shortDatabase(Database *database)
 */
 int         addDatabaseElement(Database *database, Element *element)
 {
-	Element	**memory;
-	size_t	size;
+	int		index;
+	/*size_t	size;*/
+	/* Element	**memory;*/
 
 	if (!database || !element)
 		return (MEMORY_ERROR);
 
 	if (findDatabaseElement(database, element->index.key))
-	{
 		return (REPEATED_ELEMENT);
-	}
 
-	size = databaseLength(database);
-	if (size == database->size)
+	if (database->type == FIRST_FIT)
 	{
-		memory = realloc(database->elements, (database->size * database->size + 1) * sizeof(Database));
-		if (!memory)
+		index = 0;
+		while (database->elements[index])
 		{
-			printf("Memory error!\n");
-			exit(MEMORY_ERROR);
+			if (database->elements[index]->using == 0 && element->index.size <= database->elements[index]->index.size)
+				break;
+			index++;
 		}
-		database->elements = memory;
-		database->size *= database->size;
-		database->elements[size++] = element;
-		while (size < database->size)
-			database->elements[size++] = NULL;
-	}
-	else
-	{
-		database->elements[size] = element;
-		database->elements[size + 1] = NULL;
+		database = replace_empty_element(index, element, database);
+		if (!database)
+			return MEMORY_ERROR;
 	}
 
-	/* Ordenamod la base de datos , y fijamos nuevos offsets */
-	shortDatabase(database);
+	if (database->type == WORST_FIT)
+	{
+		/* TODO: añadir WORST_FIT */
+	}
+
+	if (database->type == BEST_FIT)
+	{
+		/* TODO: añadir BEST_FIT */
+	}
 
 	return OK;
 }

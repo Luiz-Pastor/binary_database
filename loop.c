@@ -6,6 +6,7 @@
 #include "database.h"
 #include "loop.h"
 
+/* TODO: añadir y comentar el comando printLst */
 enum {
 	EXIT = 0,
 	ADD,
@@ -115,6 +116,7 @@ static void command_printind(Database *database)
 {
 	int	index = 0;
 
+	/* TODO: hacer que se imrpiman en orden, no segun la colocacion de la tabla */
 	while (database->elements[index])
 	{
 		if (database->elements[index]->using)
@@ -133,6 +135,7 @@ static void command_printrec(Database *database)
 	int		index = 0;
 	Element	*current;
 
+	/* TODO: hacer que se imrpiman en orden, no segun la colocacion de la tabla. Copiar `printInd`, basicamente */
 	while (database->elements[index])
 	{
 		current = database->elements[index];
