@@ -34,19 +34,20 @@ Element *createElement()
 */
 void	cleanElement(Element *element)
 {
+	int i;
+
 	if (!element)
 		return ;
 
 	element->using = 0;
-
 	element->index.key = 0;
+
+	for (i = 0; i < 16; i++)
+		element->isbn[i] = '\0';
 
 	if (element->title)
 		free(element->title);
 	element->title = NULL;
-	if (element->printedBy)
-		free(element->printedBy);
-	element->printedBy = NULL;
 }
 
 /*
