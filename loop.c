@@ -136,7 +136,8 @@ static void command_printrec(Database *database)
 	while (database->elements[index])
 	{
 		current = database->elements[index];
-		printf("%d|%s|%s|%s\n", current->index.key, current->isbn, current->title, current->printedBy);
+		if (current->using)
+			printf("%d|%s|%s|%s\n", current->index.key, current->isbn, current->title, current->printedBy);
 		index++;
 	}
 }
