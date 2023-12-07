@@ -7,12 +7,13 @@
  * @brief	Function that is responsible for reading a database through a
 			binary file.
  * 
+ * @param	insertion Way to insert elements into the database.
  * @param 	filename Name of the file with the database.
  * 
  * @return	Database struct, with an array with all the elements of the database,
  * 			NULL-terminated.
 */
-Database	*read_database(char *filename);
+Database	*read_database(char *insertion, char *filename);
 
 /*
  * @brief	Function that deletes a database (NULL-terminated).

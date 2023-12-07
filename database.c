@@ -54,10 +54,12 @@ static void     *error_reading(Element *element, Database *database, FILE **file
 
 /*
  * @brief	Function to initialize a empty database
+ *
+ * @param	insertion Way to insert elements into the database.
  * 
  * @return	An empty database, or NULL if there is a memory problem
 */
-static Database *initDatabase()
+static Database *initDatabase(char *insertion)
 {
 	Database	*database;
 
@@ -71,13 +73,22 @@ static Database *initDatabase()
 		free(database);
 		return (NULL);
 	}
+
+	/* Ponemos el tipo de inserción a la hora de meter datos */
+	if (!strcmp(insertion, "first_fit"))
+		database->type = FIRST_FIT;
+	else if (!strcmp(insertion, "worst_fit"))
+		database->type = WORST_FIT;
+	else
+		database->type = BEST_FIT;
+
 	return (database);
 }
 
 /*
  * Function that is responsible for reading a database through a binary file
 */
-Database        *read_database(char *filename)
+Database        *read_database(char *insertion, char *filename)
 {
 	FILE		*file;				/* Archivo del que leer */
 	Element		*current;			/* Elemento que se crea */
@@ -91,7 +102,7 @@ Database        *read_database(char *filename)
 	int			count;				/* Espacio para el campo `printedBy`*/
 	int			exists;             /* El elemento existe */
 
-	database = initDatabase();
+	database = initDatabase(insertion);
 	if (!database)
 		return (NULL);
 
@@ -217,6 +228,15 @@ void    printDatabase(Database *database)
 	int	index = 0;
 
 	printf("\n");
+	printf("Método de inserción: \n");
+	if (database->type == FIRST_FIT)
+		printf("FIRST_FIT\n");
+	else if (database->type == WORST_FIT)
+		printf("WORST_FIT\n");
+	else
+		printf("BEST_FIT\n");
+
+
 	while (database->elements[index])
 	{
 		printElement(database->elements[index++]);

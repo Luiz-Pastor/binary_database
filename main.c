@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 	sprintf(filename, "%s.db", argv[2]);
 
 	/* Read all the info in the database */
-	database = read_database(filename);
+	database = read_database(argv[1], filename);
 	if (!database)
 	{
 		printf("Error reading the database.\n");

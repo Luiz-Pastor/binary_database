@@ -24,9 +24,15 @@ typedef struct {
 
 typedef struct {
 	int		size;
+	int		type;		/* Tipo de inserción */
 	Element	**elements;
 } Database;
 
+enum {
+	FIRST_FIT,
+	WORST_FIT,
+	BEST_FIT
+};
 
 enum {
 	OK = 0,
