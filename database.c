@@ -349,7 +349,7 @@ static Database	*replace_empty_element(int index, Element *element, Database *da
 	Element	*empty, *new_empty, *aux;
 
 	empty = database->elements[index];
-	if (!empty)
+	if (empty == NULL)
 	{
 		/* Se inserta el elemento al final de la base de datos. Expandimos la tabla un elemento */
 		database = expand_database(database, 1);
@@ -400,7 +400,8 @@ static Database	*replace_empty_element(int index, Element *element, Database *da
 		/* Le ponemos tamaño y offset al elemento vacío */
 		new_empty->using = 0;
 		new_empty->index.size = new_size;
-		new_empty->index.offset = database->elements[index]->index.size + strlen(database->elements[index]->printedBy) + 1;
+		new_empty->index.offset = element->index.offset + element->index.size + 8;
+		/* new_empty->index.offset = database->elements[index]->index.size + strlen(database->elements[index]->printedBy) + 1; */
 		/* new_empty->index.offset = database->elements[index]->index.size + strlen(database->elements[index]->printedBy) + 1; */
 		
 		/* Eliminamos el previo elemento vacio  lo reemplazamos por la primera parte de los nuevos */
@@ -425,6 +426,7 @@ static Database	*replace_empty_element(int index, Element *element, Database *da
 /*
  * Function that adds a block to the database
 */
+/* TODO: revisar que las condiciones del WORST y BEST fit esten bien */
 int         addDatabaseElement(Database *database, Element *element)
 {
 	int		index, select;
@@ -453,8 +455,6 @@ int         addDatabaseElement(Database *database, Element *element)
 
 	else if (database->type == WORST_FIT)
 	{
-		/* TODO: añadir WORST_FIT. Coge el más grande */
-
 		/* Si la array está vacía, insertamos elemento al principio*/
 		if (!database->elements[0])
 		{
@@ -484,7 +484,6 @@ int         addDatabaseElement(Database *database, Element *element)
 
 	else if (database->type == BEST_FIT)
 	{
-		/* TODO: añadir BEST_FIT. Coge el más pequeño */
 		/* Si la array está vacía, insertamos elemento al principio*/
 		if (!database->elements[0])
 		{
@@ -589,7 +588,7 @@ Element *getLastElement(Database *database)
  * 
  * @return	The element, or NULL if it does not exist.
 */
-static Element* find_recursive(Database *database, int start, int end, int key)
+static Element* find_recursive(Element **elements, int start, int end, int key)
 {
 	int	mid;
 
@@ -598,20 +597,20 @@ static Element* find_recursive(Database *database, int start, int end, int key)
 
 	if (start == end)
 	{
-		if (database->elements[start]->index.key == key)
-			return (database->elements[start]);
+		if (elements[start]->index.key == key)
+			return (elements[start]);
 		else
 			return NULL;
 	}
 
 	mid = (end + start) / 2;
-	if (database->elements[mid]->index.key == key)
-		return database->elements[mid];
+	if (elements[mid]->index.key == key)
+		return elements[mid];
 
-	if (database->elements[mid]->index.key < key)
-		return find_recursive(database, mid + 1, end, key);
+	if (elements[mid]->index.key < key)
+		return find_recursive(elements, mid + 1, end, key);
 	else
-		return find_recursive(database, start, mid, key);
+		return find_recursive(elements, start, mid, key);
 	return NULL;
 }
 
@@ -620,11 +619,24 @@ static Element* find_recursive(Database *database, int start, int end, int key)
 */
 Element         *findDatabaseElement(Database *database, int key)
 {
+	Element	**copy, *result;
+
 	if (!database)
 		return (NULL);
 
-	/* TODO: crear copia con elementos ordenados para busqueda binaria */
-	return find_recursive(database, 0, databaseLength(database) - 1, key);
+	/* La busqueda binaria solo funciona con datos ordenados. Copiamos la tabla y la ordenamos */
+	copy = copyElements(database->elements);
+	if (!copy)
+		return NULL;
+	shortElements(copy);
+
+	/* Aplciamos la busqueda binaria */
+	result = find_recursive(copy, 0, databaseLength(database) - 1, key);
+
+	/* Eliminamos la memoria auxiliar */
+	free(copy);
+
+	return result;
 }
 
 /* =================================================================================== */

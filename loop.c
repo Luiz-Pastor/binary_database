@@ -114,52 +114,22 @@ static Element* command_find(Database *database, char *input)
 
 static void command_printind(Database *database)
 {
-	int	i, j, index;
-	Element	**order, *aux;
+	int		index;
+	Element	**order;
 
-	/* Creamos un tabal de elementos auxilia, para ordenarlos */
-	order = malloc((databaseLength(database) + 1) * sizeof(Element *));
+	/* Copiamos los elementos de la tabla original en la nueva */
+	order = copyElements(database->elements);
 	if (!order)
 		return ;
 
-	/* Copiamos los elementos de la tabla original en la nueva */
-	i = 0;
-	while (database->elements[i])
-	{
-		order[i] = database->elements[i];
-		i++;
-	}
-	order[i] = NULL;
-
 	/* Ordenamos, aplicando SelectorSort*/
-	i = 0;
-	while (order[i])
-	{
-		j = i + 1;
-		index = i;
-
-		while (order[j])
-		{
-			if (order[j]->index.key < order[index]->index.key)
-				index = j;
-			j++;
-		}
-
-		if (i != index)
-		{
-			aux = order[i];
-			order[i] = order[index];
-			order[index] = aux;
-		}
-
-		i++;
-	}
+	shortElements(order);
 	
 	/* Imprimimos los elementos de la tabla ordenada */
 	index = 0;
 	while (order[index])
 	{
-		if (order[index])
+		if (order[index]->using)
 		{
 			printf("Entry #%d\n", index);
 			printf("    key: #%d\n", order[index]->index.key);
@@ -175,48 +145,19 @@ static void command_printind(Database *database)
 
 static void command_printrec(Database *database)
 {
-	int		i, j, index = 0;
-	Element	*current, **order, *aux;
+	int		index;
+	Element	*current, **order;
 
-	/* Creamos un tabal de elementos auxilia, para ordenarlos */
-	order = malloc((databaseLength(database) + 1) * sizeof(Element *));
+	/* Copiamos los elementos de la tabla original en la nueva */
+	order = copyElements(database->elements);
 	if (!order)
 		return ;
 
-	/* Copiamos los elementos de la tabla original en la nueva */
-	i = 0;
-	while (database->elements[i])
-	{
-		order[i] = database->elements[i];
-		i++;
-	}
-	order[i] = NULL;
-
-	/* Ordenamos, aplicando SelectorSort*/
-	i = 0;
-	while (order[i])
-	{
-		j = i + 1;
-		index = i;
-
-		while (order[j])
-		{
-			if (order[j]->index.key < order[index]->index.key)
-				index = j;
-			j++;
-		}
-
-		if (i != index)
-		{
-			aux = order[i];
-			order[i] = order[index];
-			order[index] = aux;
-		}
-
-		i++;
-	}
+	/* Ordenamos, aplicando SelectorSort */
+	shortElements(order);
 
 	/* Imprimimos los elementos de la tabla ordenada */
+	index = 0;
 	while (order[index])
 	{
 		current = order[index];
@@ -224,6 +165,9 @@ static void command_printrec(Database *database)
 			printf("%d|%s|%s|%s\n", current->index.key, current->isbn, current->title, current->printedBy);
 		index++;
 	}
+
+	/* Eliminamos la memoria de la tabla auxiliar */
+	free(order);
 }
 
 static int command_del(Database *database, char *command)
@@ -262,6 +206,8 @@ static int command_del(Database *database, char *command)
 	}
 	
 	cleanElement(element);
+
+	
 
 	free(copy);
 	return OK;
@@ -341,13 +287,13 @@ void    take_commands(Database *database)
 				switch (command_del(database, arguments))
 				{
 					case OK:
-						printf("Record with bookId=%d has been deleted\n", atoi(arguments));
+						printf("Record with BookID=%d has been deleted\n", atoi(arguments));
 						break;
 					case BAD_FORMAT:
 						printf("Bad expression format\n");
 						break;
 					case ERROR:
-						printf("Record with bookId=%d does not exist\n", atoi(arguments));
+						printf("Record with BookID=%d does not exist\n", atoi(arguments));
 						break;
 				}
 				break;

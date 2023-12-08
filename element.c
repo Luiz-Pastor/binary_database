@@ -76,3 +76,59 @@ void	printElement(Element *element)
 	printf("\tTitle:\t\t%s\n", element->title);
 	printf("\tEditorial:\t%s\n", element->printedBy);
 }
+
+Element	**copyElements(Element **elements)
+{
+	Element **copy;
+	int		index;
+
+	if (!elements)
+		return NULL;
+
+	index = 0;
+	while (elements[index])
+		index++;
+
+	copy = malloc((index + 1) * sizeof(Element *));
+	if (!copy)
+		return NULL;
+
+	index = 0;
+	while (elements[index])
+	{
+		copy[index] = elements[index];
+		index++;
+	}
+	copy[index] = NULL;
+	return (copy);
+}
+
+void	shortElements(Element **elements)
+{
+	int		i, j, index;
+	Element	*aux;
+
+	if (!elements)
+		return ;
+
+	i = 0;
+	while (elements[i])
+	{
+		index = i;
+		j = i + 1;
+		while (elements[j])
+		{
+			if (elements[index]->index.key > elements[j]->index.key)
+				index = j;
+			j++;
+		}
+
+		if (i != index)
+		{
+			aux = elements[i];
+			elements[i] = elements[index];
+			elements[index] = aux;
+		}
+		i++;
+	}
+}
