@@ -48,6 +48,9 @@ void	cleanElement(Element *element)
 	if (element->title)
 		free(element->title);
 	element->title = NULL;
+	if (element->printedBy)
+		free(element->printedBy);
+	element->printedBy = NULL;
 }
 
 /*
