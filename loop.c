@@ -112,11 +112,10 @@ static Element* command_find(Database *database, char *input)
 	return findDatabaseElement(database, bookID);
 }
 
-static void command_printind(Database *database)
+/*static void command_printind(Database *database)
 {
 	int	index = 0;
 
-	/* TODO: hacer que se imrpiman en orden, no segun la colocacion de la tabla */
 	while (database->elements[index])
 	{
 		if (database->elements[index]->using)
@@ -128,6 +127,62 @@ static void command_printind(Database *database)
 		}
 		index++;
 	}
+}*/
+
+static void command_printind(Database *database)
+{
+	int	i, j, index;
+	Element	**order, *aux;
+
+	order = malloc((databaseLength(database) + 1) * sizeof(Element *));
+	if (!order)
+		return ;
+
+	i = 0;
+	while (database->elements[i])
+	{
+		order[i] = database->elements[i];
+		i++;
+	}
+	order[i] = NULL;
+
+	i = 0;
+	while (order[i])
+	{
+		j = i + 1;
+		index = i;
+		
+		while (order[j])
+		{
+			if (order[j]->index.key < order[index]->index.key)
+				index = j;
+			j++;
+		}
+
+		if (i != index)
+		{
+			aux = order[i];
+			order[i] = order[index];
+			order[index] = aux;
+		}
+
+		i++;
+	}
+	
+	/* TODO: hacer que se imrpiman en orden, no segun la colocacion de la tabla */
+	index = 0;
+	while (order[index])
+	{
+		if (order[index])
+		{
+			printf("Entry #%d\n", index);
+			printf("    key: #%d\n", order[index]->index.key);
+			printf("    offset: #%ld\n", order[index]->index.offset);
+			printf("    size: #%ld\n", order[index]->index.size);
+		}
+		index++;
+	}
+	free(order);
 }
 
 static void command_printrec(Database *database)
