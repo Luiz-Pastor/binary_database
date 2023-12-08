@@ -112,32 +112,17 @@ static Element* command_find(Database *database, char *input)
 	return findDatabaseElement(database, bookID);
 }
 
-/*static void command_printind(Database *database)
-{
-	int	index = 0;
-
-	while (database->elements[index])
-	{
-		if (database->elements[index]->using)
-		{
-			printf("Entry #%d\n", index);
-			printf("    key: #%d\n", database->elements[index]->index.key);
-			printf("    offset: #%ld\n", database->elements[index]->index.offset);
-			printf("    size: #%ld\n", database->elements[index]->index.size);
-		}
-		index++;
-	}
-}*/
-
 static void command_printind(Database *database)
 {
 	int	i, j, index;
 	Element	**order, *aux;
 
+	/* Creamos un tabal de elementos auxilia, para ordenarlos */
 	order = malloc((databaseLength(database) + 1) * sizeof(Element *));
 	if (!order)
 		return ;
 
+	/* Copiamos los elementos de la tabla original en la nueva */
 	i = 0;
 	while (database->elements[i])
 	{
@@ -146,12 +131,13 @@ static void command_printind(Database *database)
 	}
 	order[i] = NULL;
 
+	/* Ordenamos, aplicando SelectorSort*/
 	i = 0;
 	while (order[i])
 	{
 		j = i + 1;
 		index = i;
-		
+
 		while (order[j])
 		{
 			if (order[j]->index.key < order[index]->index.key)
@@ -169,7 +155,7 @@ static void command_printind(Database *database)
 		i++;
 	}
 	
-	/* TODO: hacer que se imrpiman en orden, no segun la colocacion de la tabla */
+	/* Imprimimos los elementos de la tabla ordenada */
 	index = 0;
 	while (order[index])
 	{
@@ -182,18 +168,58 @@ static void command_printind(Database *database)
 		}
 		index++;
 	}
+
+	/* Eliminamos la memoria de la tabla auxiliar */
 	free(order);
 }
 
 static void command_printrec(Database *database)
 {
-	int		index = 0;
-	Element	*current;
+	int		i, j, index = 0;
+	Element	*current, **order, *aux;
 
-	/* TODO: hacer que se imrpiman en orden, no segun la colocacion de la tabla. Copiar `printInd`, basicamente */
-	while (database->elements[index])
+	/* Creamos un tabal de elementos auxilia, para ordenarlos */
+	order = malloc((databaseLength(database) + 1) * sizeof(Element *));
+	if (!order)
+		return ;
+
+	/* Copiamos los elementos de la tabla original en la nueva */
+	i = 0;
+	while (database->elements[i])
 	{
-		current = database->elements[index];
+		order[i] = database->elements[i];
+		i++;
+	}
+	order[i] = NULL;
+
+	/* Ordenamos, aplicando SelectorSort*/
+	i = 0;
+	while (order[i])
+	{
+		j = i + 1;
+		index = i;
+
+		while (order[j])
+		{
+			if (order[j]->index.key < order[index]->index.key)
+				index = j;
+			j++;
+		}
+
+		if (i != index)
+		{
+			aux = order[i];
+			order[i] = order[index];
+			order[index] = aux;
+		}
+
+		i++;
+	}
+
+	/* Imprimimos los elementos de la tabla ordenada */
+	while (order[index])
+	{
+		current = order[index];
 		if (current->using)
 			printf("%d|%s|%s|%s\n", current->index.key, current->isbn, current->title, current->printedBy);
 		index++;
