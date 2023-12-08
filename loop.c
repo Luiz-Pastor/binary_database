@@ -53,12 +53,6 @@ static int get_command(char *command)
 
 static int command_add(char *input, Database *database)
 {
-	/*
-	- Repetido:     add 12345|978-2-12345680-3|El Quijote|catedra
-	- No repetido:  add 00001|978-2-12345680-3|El Quijote|catedra
-	- Bad format:   add 99998|978-2-12345683|El Quijote|catedra
-	*/
-
 	Element	*element;
 	char	*string;
 
@@ -122,7 +116,7 @@ static Element* command_find(Database *database, char *input)
 
 static void command_printind(Database *database)
 {
-	int		index;
+	int		i, index;
 	Element	**order;
 
 	/* Copiamos los elementos de la tabla original en la nueva */
@@ -135,14 +129,16 @@ static void command_printind(Database *database)
 	
 	/* Imprimimos los elementos de la tabla ordenada */
 	index = 0;
+	i = 0;
 	while (order[index])
 	{
 		if (order[index]->using)
 		{
-			printf("Entry #%d\n", index);
+			printf("Entry #%d\n", i);
 			printf("    key: #%d\n", order[index]->index.key);
 			printf("    offset: #%ld\n", order[index]->index.offset);
 			printf("    size: #%ld\n", order[index]->index.size);
+			i++;
 		}
 		index++;
 	}
@@ -301,7 +297,7 @@ void    take_commands(Database *database)
 						printf("Bad expression format\n");
 						break;
 					case ERROR:
-						printf("Record with BookID=%d does not exist\n", atoi(arguments));
+						printf("Item with key %d does not exist\n", atoi(arguments));
 						break;
 				}
 				break;
