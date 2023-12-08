@@ -427,7 +427,7 @@ static Database	*replace_empty_element(int index, Element *element, Database *da
 */
 int         addDatabaseElement(Database *database, Element *element)
 {
-	int		index;
+	int		index, select;
 	/*size_t	size;*/
 	/* Element	**memory;*/
 
@@ -451,14 +451,65 @@ int         addDatabaseElement(Database *database, Element *element)
 			return MEMORY_ERROR;
 	}
 
-	if (database->type == WORST_FIT)
+	else if (database->type == WORST_FIT)
 	{
-		/* TODO: añadir WORST_FIT */
+		/* TODO: añadir WORST_FIT. Coge el más grande */
+
+		/* Si la array está vacía, insertamos elemento al principio*/
+		if (!database->elements[0])
+		{
+			database = replace_empty_element(0, element, database);
+			if (!database)
+				return MEMORY_ERROR;
+			return OK;
+		}
+		
+		/* Buscamos el hueco más grande, entre los que están libres */
+		select = -1;
+		index = 0;
+		while (database->elements[index])
+		{
+			if (database->elements[index]->using == 0 && (select == -1 || database->elements[select]->index.size < database->elements[index]->index.size))
+				select = index;
+			index++;
+		}
+
+		if (select == -1)
+			select = index;
+
+		database = replace_empty_element(select, element, database);
+		if (!database)
+			return MEMORY_ERROR;
 	}
 
-	if (database->type == BEST_FIT)
+	else if (database->type == BEST_FIT)
 	{
-		/* TODO: añadir BEST_FIT */
+		/* TODO: añadir BEST_FIT. Coge el más pequeño */
+		/* Si la array está vacía, insertamos elemento al principio*/
+		if (!database->elements[0])
+		{
+			database = replace_empty_element(0, element, database);
+			if (!database)
+				return MEMORY_ERROR;
+			return OK;
+		}
+		
+		/* Buscamos el hueco más pequeño, entre los que están libres */
+		select = -1;
+		index = 0;
+		while (database->elements[index])
+		{
+			if (database->elements[index]->using == 0 && (select == -1 || database->elements[select]->index.size > database->elements[index]->index.size))
+				select = index;
+			index++;
+		}
+
+		if (select == -1)
+			select = index;
+
+		database = replace_empty_element(select, element, database);
+		if (!database)
+			return MEMORY_ERROR;
 	}
 
 	return OK;
@@ -572,6 +623,7 @@ Element         *findDatabaseElement(Database *database, int key)
 	if (!database)
 		return (NULL);
 
+	/* TODO: crear copia con elementos ordenados para busqueda binaria */
 	return find_recursive(database, 0, databaseLength(database) - 1, key);
 }
 
