@@ -68,11 +68,16 @@ static int command_add(char *input, Database *database)
 	
 	/* bookID */
 	string = strtok(input, "|");
+	if (!string)
+	{
+		deleteElement(element);
+		return BAD_FORMAT;
+	}
 	element->index.key = atoi(string);
 
 	/* ISBN */
 	string = strtok(NULL, "|");
-	if (strlen(string) != ISBN_LENGTH)
+	if (!string || strlen(string) != ISBN_LENGTH)
 	{
 		deleteElement(element);
 		return BAD_FORMAT;
@@ -81,7 +86,7 @@ static int command_add(char *input, Database *database)
 
 	/* Title */
 	string = strtok(NULL, "|");
-	if (strlen(string) > MAX_LENGTH)
+	if (!string || strlen(string) > MAX_LENGTH)
 	{
 		deleteElement(element);
 		return BAD_FORMAT;
@@ -90,7 +95,7 @@ static int command_add(char *input, Database *database)
 
 	/* printedBy */
 	string = strtok(NULL, "\0");
-	if (strlen(string) > MAX_LENGTH)
+	if (!string || strlen(string) > MAX_LENGTH)
 	{
 		deleteElement(element);
 		return BAD_FORMAT;
@@ -99,7 +104,10 @@ static int command_add(char *input, Database *database)
 	element->index.size = 20 + strlen(element->title) + strlen(element->printedBy) + 1;
 
 	if (addDatabaseElement(database, element))
+	{
+		deleteElement(element);
 		return REPEATED_ELEMENT;
+	}
 
 	return (OK);
 }
