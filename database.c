@@ -99,7 +99,8 @@ static void setOffset(Database *database)
 	while (database->elements[i])
 	{
 		database->elements[i]->index.offset = offset;
-		offset += database->elements[i]->index.size + strlen(database->elements[i]->printedBy) + 1;
+		/* offset += database->elements[i]->index.size + strlen(database->elements[i]->printedBy) + 1; */
+		offset += database->elements[i]->index.size + 8;
 		i++;
 	}
 }
@@ -362,7 +363,8 @@ static Database	*replace_empty_element(int index, Element *element, Database *da
 		if (index == 0)
 			element->index.offset = 0;
 		else
-			element->index.offset = database->elements[index - 1]->index.offset + database->elements[index - 1]->index.size + strlen(database->elements[index - 1]->printedBy) + 1;
+			element->index.offset = database->elements[index - 1]->index.offset + database->elements[index - 1]->index.size + 8;
+			/* element->index.offset = database->elements[index - 1]->index.offset + database->elements[index - 1]->index.size + strlen(database->elements[index - 1]->printedBy) + 1; */
 
 		return database;
 	}
@@ -399,6 +401,7 @@ static Database	*replace_empty_element(int index, Element *element, Database *da
 		new_empty->using = 0;
 		new_empty->index.size = new_size;
 		new_empty->index.offset = database->elements[index]->index.size + strlen(database->elements[index]->printedBy) + 1;
+		/* new_empty->index.offset = database->elements[index]->index.size + strlen(database->elements[index]->printedBy) + 1; */
 		
 		/* Eliminamos el previo elemento vacio  lo reemplazamos por la primera parte de los nuevos */
 		deleteElement(empty);
