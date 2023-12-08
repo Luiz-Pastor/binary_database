@@ -7,7 +7,7 @@ set programName "library"
 set filename "test"
 
 # create index and database
-exec "./add_index_test.sh"
+exec "../add_index_test.sh"
 
 #restart program
 spawn ./$programName first_fit test

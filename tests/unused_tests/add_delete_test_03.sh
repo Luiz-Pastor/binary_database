@@ -14,7 +14,7 @@ spawn rm -f $filename.db $filename.ind
 
 # call program
 #spawn valgrind ./$programName best_fit test
-spawn ./$programName best_fit test
+spawn ../$programName best_fit test
 expect "Type command and argument/s."
 expect "exit"
 
