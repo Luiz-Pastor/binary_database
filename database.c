@@ -63,17 +63,23 @@ static Database *initDatabase(char *insertion)
 {
 	Database	*database;
 
+	/* Reservamos memoria para la estructura principal */
 	database = malloc(sizeof(Database));
 	if (!database)
 		return (NULL);
-	database->size = 2;
-	database->elements = calloc(3, sizeof(Element*));
-	if (!database->elements)
+
+	/* Reservamos memoria para la tabla de elementos y para la de elementos eliminados */
+	database->elements = calloc(3, sizeof(Element *));
+	database->deleted = calloc(3, sizeof(Element *));
+	if (!database->elements || !database->deleted)
 	{
-		free(database);
+		free_database(database);
 		return (NULL);
 	}
-
+	
+	/* Fijamos el espacio inicial del array de elementos */
+	database->size = 2;
+	
 	/* Ponemos el tipo de inserción a la hora de meter datos */
 	if (!strcmp(insertion, "first_fit"))
 		database->type = FIRST_FIT;
@@ -230,9 +236,14 @@ void    *free_database(Database *database)
 
 	if (!database)
 		return (NULL);
+
+	/* Eliminamos todos los registros guardados, tanto los guardados como los no guardados */
 	while (database->elements && database->elements[index])
 		deleteElement(database->elements[index++]);
+
+	/* Eliminamos los punteros en los que habíamos reservado lso arrays */
 	free(database->elements);
+	free(database->deleted);
 	free(database);
 	return (NULL);
 }
@@ -283,61 +294,48 @@ size_t  databaseLength(Database *database)
 	return size;
 }
 
-/* =================================================================================== */
-/* =================================================================================== */
-/* =================================================================================== */
-
-/*
- * @brief	Function to sort a database.
- * 
- * @param	database Database to sort.
-*/
-/*static void shortDatabase(Database *database)
+size_t	databaseDeletedLength(Database *database)
 {
-	int		i, j, min, length;
-	Element	*aux;
+	size_t	size = 0;
 
-	if (!database)
-		return ;
-	
-	length = databaseLength(database);
-	for (i = 0; i < length; i++)
-	{
-		min = i;
-		for (j = i + 1; j < length; j++)
-		{
-			if (database->elements[j]->index.key < database->elements[min]->index.key)
-				min = j;
-		}
-		if (min != i)
-		{
-			aux = database->elements[i];
-			database->elements[i] = database->elements[min];
-			database->elements[min] = aux;
-		}
-	}
-	setOffset(database);
-}*/
+	if (!database || !database->deleted)
+		return (0);
+	while (database->deleted[size])
+		size++;
+	return size;
+}
+
+/* =================================================================================== */
+/* =================================================================================== */
+/* =================================================================================== */
 
 static Database	*expand_database(Database *database, int count)
 {
-	size_t		size;
+	size_t		size_elements, size_deleted;
 	Element		**memory;
 
 	if (!database)
 		return NULL;
 
-	size = databaseLength(database);
-	if ((size + count) >= database->size)
+	size_elements = databaseLength(database);
+	size_deleted = databaseDeletedLength(database);
+	if ((size_elements + count) >= database->size || (size_deleted + count) >= database->size)
 	{
 		memory = realloc(database->elements, (database->size * database->size + 1) * sizeof(Element*));
-
 		if (!memory)
 		{
 			free_database(database);
 			return NULL;
 		}
 		database->elements = memory;
+		memory = realloc(database->deleted, (database->size * database->size + 1) * sizeof(Element*));
+		if (!memory)
+		{
+			free_database(database);
+			return NULL;
+		}
+		database->deleted = memory;
+
 		database->size *= database->size;
 	}
 	return database;
@@ -345,9 +343,10 @@ static Database	*expand_database(Database *database, int count)
 
 static Database	*replace_empty_element(int index, Element *element, Database *database)
 {
-	int	new_size;
+	int	new_size, i;
 	Element	*empty, *new_empty, *aux;
 
+	/* Miramos si el elemento que hay que sustituir es NULL; en ese caso se trata del final de la base de datos */
 	empty = database->elements[index];
 	if (empty == NULL)
 	{
@@ -379,7 +378,25 @@ static Database	*replace_empty_element(int index, Element *element, Database *da
 		/* Cambiamos el offset al que tenia el elemento vacío */
 		element->index.offset = empty->index.offset;
 
-		/* Eliminamos el elemento vacío*/
+		/* Buscar el elemento en el array de eliminados */
+		i = 0;
+		while (database->deleted[i])
+		{
+			if (database->deleted[i] == empty)
+				break ;
+			i++;
+		}
+
+		/* Movemos toda el array de eliminados una posición a la izquierda, a partir del elemento eliminado */
+		database->deleted[i] = NULL;
+		while (database->deleted[i + 1])
+		{
+			database->deleted[i] = database->deleted[i + 1];
+			database->deleted[i + 1] = NULL;
+			i++;
+		}
+
+		/* Eliminamos el elemento */
 		deleteElement(empty);
 	}
 	else
@@ -404,11 +421,25 @@ static Database	*replace_empty_element(int index, Element *element, Database *da
 		/* new_empty->index.offset = database->elements[index]->index.size + strlen(database->elements[index]->printedBy) + 1; */
 		/* new_empty->index.offset = database->elements[index]->index.size + strlen(database->elements[index]->printedBy) + 1; */
 		
-		/* Eliminamos el previo elemento vacio  lo reemplazamos por la primera parte de los nuevos */
-		deleteElement(empty);
+		/* Reemplazamos el elemento vacío por el que hay que insertar */
 		database->elements[index] = element;
 
-		/* Iteramos moviendo todos los elementos una posición a la derecha */
+		/* Buscamos el elemento a eliminar definitivamente del array de eliminados */
+		i = 0;
+		while (database->deleted[i])
+		{
+			if (database->deleted[i] == empty)
+				break ;
+			i++;
+		}
+
+		/* Sustituimos este elemento por el nuevo elemento vacío*/
+		database->deleted[i] = new_empty;
+
+		/* Eliminamos el elemento */
+		deleteElement(empty);
+
+		/* Iteramos moviendo todos los elementos existentes una posición a la derecha, para colocar el vacío sobrante */
 		index++;
 		while (database->elements[index])
 		{
@@ -419,6 +450,7 @@ static Database	*replace_empty_element(int index, Element *element, Database *da
 		}
 		database->elements[index] = new_empty;
 		database->elements[index + 1] = NULL;
+
 	}
 	return database;
 }
@@ -426,7 +458,7 @@ static Database	*replace_empty_element(int index, Element *element, Database *da
 /*
  * Function that adds a block to the database
 */
-/* TODO: revisar que las condiciones del WORST y BEST fit esten bien */
+
 int         addDatabaseElement(Database *database, Element *element)
 {
 	int		index, select;
@@ -469,7 +501,8 @@ int         addDatabaseElement(Database *database, Element *element)
 		index = 0;
 		while (database->elements[index])
 		{
-			if (database->elements[index]->using == 0 && (select == -1 || database->elements[select]->index.size < database->elements[index]->index.size))
+			if (database->elements[index]->using == 0 && element->index.size <= database->elements[index]->index.size
+			&& (select == -1 || database->elements[select]->index.size < database->elements[index]->index.size))
 				select = index;
 			index++;
 		}
@@ -640,3 +673,28 @@ Element         *findDatabaseElement(Database *database, int key)
 }
 
 /* =================================================================================== */
+
+int				delDatabaseElement(Database *database, Element *element)
+{
+	int	index;
+
+	if (!database || !element)
+		return (MEMORY_ERROR);
+
+	cleanElement(element);
+
+	database = expand_database(database, 1);
+	if (!database)
+		return (MEMORY_ERROR);
+
+	index = 0;
+	while (database->deleted[index])
+		index++;
+	
+	database->deleted[index] = element;
+	database->deleted[index + 1] = NULL;
+
+	shortElementsDeleted(database->deleted, database->type);
+
+	return OK;
+}

@@ -132,3 +132,43 @@ void	shortElements(Element **elements)
 		i++;
 	}
 }
+
+/* ================================================================================ */
+/* ================================================================================ */
+/* ================================================================================ */
+
+static void	shortMode(Element **deleted, int mode)
+{
+	int		i, j, index;
+	Element	*aux;
+
+	i = 0;
+	while (deleted[i])
+	{
+		index = i;
+		j = i + 1;
+		while (deleted[j])
+		{
+			if (mode == BEST_FIT && deleted[index]->index.size > deleted[j]->index.size)
+				index = j;
+			else if (mode == WORST_FIT && deleted[index]->index.size < deleted[j]->index.size)
+				index = j;
+			j++;
+		}
+			if (i != index)
+		{
+			aux = deleted[i];
+			deleted[i] = deleted[index];
+			deleted[index] = aux;
+		}
+		i++;
+	}
+}
+
+void	shortElementsDeleted(Element **deleted, int type)
+{
+	if (!deleted || type == FIRST_FIT)
+		return ;
+
+	shortMode(deleted, type);
+}

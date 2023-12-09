@@ -6,13 +6,13 @@
 #include "database.h"
 #include "loop.h"
 
-/* TODO: añadir y comentar el comando printLst */
 enum {
 	EXIT = 0,
 	ADD,
 	FIND,
 	PRINTIND,
 	PRINTREC,
+	PRINTLST,
 	DEL,
 	UNKNOWN
 };
@@ -40,14 +40,16 @@ static int get_command(char *command)
 		return (EXIT);
 	else if (!strcmp(command, "add"))
 		return (ADD);
+	else if (!strcmp(command, "del"))
+		return (DEL);
 	else if(!strcmp(command, "find"))
 		return (FIND);
 	else if (!strcmp(command, "printInd"))
 		return (PRINTIND);
 	else if (!strcmp(command, "printRec"))
 		return (PRINTREC);
-	else if (!strcmp(command, "del"))
-		return (DEL);
+	else if (!strcmp(command, "printLst"))
+		return (PRINTLST);
 	return UNKNOWN;
 }
 
@@ -103,6 +105,52 @@ static int command_add(char *input, Database *database)
 		return REPEATED_ELEMENT;
 	}
 
+	return (OK);
+}
+
+static int command_del(Database *database, char *command)
+{
+	int		bookID, index;
+	char	*copy, *first, *second;
+	Element	*element;
+
+	copy = ft_strdup(command);
+
+	first = strtok(copy, " ");
+	second = strtok(NULL, "\0");
+
+	if (second)
+	{
+		free(copy);
+		return BAD_FORMAT;
+	}
+
+	index = 0;
+	while (first[index])
+	{
+		if (!isdigit(first[index]))
+		{
+			free(copy);
+			return BAD_FORMAT;
+		}
+		index++;
+	}
+
+	bookID = atoi(first);
+	element = findDatabaseElement(database, bookID);
+	if (!element)
+	{
+		free(copy);
+		return ERROR;
+	}
+	
+	if (delDatabaseElement(database, element))
+	{
+		free(copy);
+		return (MEMORY_ERROR);
+	}
+
+	free(copy);
 	return (OK);
 }
 
@@ -174,47 +222,20 @@ static void command_printrec(Database *database)
 	free(order);
 }
 
-static int command_del(Database *database, char *command)
+/* TODO: añadir y comentar el comando printLst */
+static void	command_printlst(Database *database)
 {
-	int		bookID, index = 0;
-	char	*copy, *first, *second;
-	Element	*element;
+	int	index;
 
-	copy = ft_strdup(command);
-
-	first = strtok(copy, " ");
-	second = strtok(NULL, "\0");
-
-	if (second)
+	index = 0;
+	while (database->deleted[index])
 	{
-		free(copy);
-		return BAD_FORMAT;
-	}
+		printf("Entry #%d\n", index);
+		printf("    offset: #%ld\n", database->deleted[index]->index.offset);
+		printf("    size: #%ld\n", database->deleted[index]->index.size);
 
-	while (first[index])
-	{
-		if (!isdigit(first[index]))
-		{
-			free(copy);
-			return BAD_FORMAT;
-		}
 		index++;
 	}
-
-	bookID = atoi(first);
-	element = findDatabaseElement(database, bookID);
-	if (!element)
-	{
-		free(copy);
-		return ERROR;
-	}
-	
-	cleanElement(element);
-
-	
-
-	free(copy);
-	return OK;
 }
 
 void    take_commands(Database *database)
@@ -249,7 +270,7 @@ void    take_commands(Database *database)
 		{
 			case EXIT:
 				return ;
-				break;
+				break ;
 
 			case ADD:
 				switch (command_add(arguments, database))
@@ -257,19 +278,19 @@ void    take_commands(Database *database)
 					case OK:
 						element = getLastElement(database);
 						printf("Record with BookID=%d has been added to the database\n", element->index.key);
-						break;
+						break ;
 					case REPEATED_ELEMENT:
 						arguments = strtok(arguments, "|");
 						printf("Record with BookID=%s exists\n", arguments);
-						break;
+						break ;
 					case MEMORY_ERROR:
 						printf("Memory error!\n");
 						return ;
 					case BAD_FORMAT:
 						printf("Bad expression format\n");
-						break;
+						break ;
 				}
-				break;
+				break ;
 
 			case FIND:
 				element = command_find(database, arguments);
@@ -277,35 +298,39 @@ void    take_commands(Database *database)
 					printf("%d|%s|%s|%s\n", element->index.key, element->isbn, element->title, element->printedBy);
 				else
 					printf("Record with bookId=%s does not exist\n", arguments);
-				break;
+				break ;
 
 			case PRINTIND:
 				command_printind(database);
-				break;
+				break ;
 
 			case PRINTREC:
 				command_printrec(database);
-				break;
+				break ;
+
+			case PRINTLST:
+				command_printlst(database);
+				break ;
 
 			case DEL:
 				switch (command_del(database, arguments))
 				{
 					case OK:
 						printf("Record with BookID=%d has been deleted\n", atoi(arguments));
-						break;
+						break ;
 					case BAD_FORMAT:
 						printf("Bad expression format\n");
-						break;
+						break ;
 					case ERROR:
 						printf("Item with key %d does not exist\n", atoi(arguments));
-						break;
+						break ;
 				}
-				break;
+				break ;
 
 			case UNKNOWN:
 				printf("Unrecognized command\n");
 			default:
-				break;
+				break ;
 		}
 		printf("exit\n");
 	}

@@ -34,5 +34,6 @@ void	printElement(Element *element);
 
 Element	**copyElements(Element **elements);
 void	shortElements(Element **elements);
+void	shortElementsDeleted(Element **deleted, int type);
 
 #endif

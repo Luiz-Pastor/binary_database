@@ -77,4 +77,6 @@ Element		*getLastElement(Database *database);
 */
 Element		*findDatabaseElement(Database *database, int key);
 
+int				delDatabaseElement(Database *database, Element *element);
+
 #endif
