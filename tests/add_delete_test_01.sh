@@ -87,9 +87,11 @@ send "printInd\n"
 expect "Entry #0"
 expect "    key: #12346"
 expect "    offset: #0"
+expect "    size: #38"
 expect "Entry #1"
 expect "    key: #12348"
 expect "    offset: #136"
+expect "    size: #36"
 expect "exit"
 
 #delete book 12348 AGAIN
