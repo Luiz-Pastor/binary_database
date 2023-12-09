@@ -7,13 +7,14 @@
 # define ISBN_LENGTH 16
 # define MAX_LENGTH 128
 
+/* Estructura de los índices */
 typedef struct {
 	int			key;    /* Book bookID */
 	long int	offset; /*Book is stored in disk at this position */
 	size_t		size;   /* Book record size. This is a redundant field that helps in the implementation */
 } indexbook;
 
-
+/* Estructura de los elementos */
 typedef struct {
 	int			using;
 	indexbook	index;
@@ -22,18 +23,22 @@ typedef struct {
 	char		*printedBy;    /* Tamaño variable, máximo de `MAX_LENGTH`*/
 } Element;
 
+/* Estructura de la base de datos */
 typedef struct {
-	int		size;
+	int		size;		/* Tamaño máximo de los arrays */
 	int		type;		/* Tipo de inserción */
-	Element	**elements;
+	Element	**elements;	/* Elementos de la bsae de dats */
+	Element **deleted;	/* Elementos borrados */
 } Database;
 
+/* Tipo de inserción en la base de datos */
 enum {
 	FIRST_FIT,
 	WORST_FIT,
 	BEST_FIT
 };
 
+/* Posibles errores de algunas funciones en específico */
 enum {
 	OK = 0,
 	REPEATED_ELEMENT,
