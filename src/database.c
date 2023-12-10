@@ -129,17 +129,18 @@ Database        *read_database(char *insertion, char *filename)
 	int			count;				/* Espacio para el campo `printedBy`*/
 	int			exists;             /* El elemento existe */
 
+	/* Creamos la estructura principal, que contiene toda la información de la base de datos */
 	database = initDatabase(insertion);
 	if (!database)
 		return (NULL);
 
+	/* En una variable guardamos el nombre del archivo que contiene la base de datos */
 	path = calloc(strlen(filename) + 4, sizeof(char));
 	if (!path)
 	{
 		free_database(database);
 		return (NULL);
 	}
-
 	sprintf(path, "%s.db", filename);
 
 	/* Abrimos el archivo sobre el que vamos a leer */
@@ -572,12 +573,15 @@ int    save_database(Database *database, char *filename)
 	char	*path;
 	FILE	*file;
 	Element	*current;
-	size_t	index = 0;
+	size_t	index;
+	size_t	aux;
 
 	if (!database)
 		return (1);
 
-	path = calloc(strlen(filename) + 4, sizeof(char));
+
+	/* Primero guardamos la base de datos. Abrimos el archivo con extensión .db */
+	path = calloc(strlen(filename) + 5, sizeof(char));
 	if (!path)
 		return (1);
 	
@@ -589,8 +593,9 @@ int    save_database(Database *database, char *filename)
 		free(path);
 		return (1);
 	}
-	free(path);
 
+	/* Nos recorremos la base de datos, guardando todos los elementos */
+	index = 0;
 	while (database->elements[index])
 	{
 		if (!database->elements[index]->using)
@@ -608,6 +613,63 @@ int    save_database(Database *database, char *filename)
 		index++;
 	}
 	fclose(file);
+
+	/* Guardamos la información de los índices */
+	sprintf(path, "%s.ind", filename);
+
+	file = fopen(path, "w");
+	if (!file)
+	{
+		free(path);
+		return (1);
+	}
+
+	/* Nos recorremos toda la base de datos, guardando la información de los índices */
+	index = 0;
+	while (database->elements[index])
+	{
+		if (!database->elements[index]->using)
+		{
+			index++;
+			continue ;
+		}
+		current = database->elements[index];
+		fwrite(&(current->index.key), sizeof(int), 1, file);
+		fwrite(&(current->index.offset), sizeof(long int), 1, file);
+		fwrite(&(current->index.size), sizeof(size_t), 1, file);
+		index++;
+	}
+	fclose(file);
+
+	/* Guardamos la información de los elementos borrados */
+	sprintf(path, "%s.lst", filename);
+
+	file = fopen(path, "w");
+	if (!file)
+	{
+		free(path);
+		return (1);
+	}
+
+	/* Recorremos la lista de eliminados */
+	/* Size | offset */
+	index = 0;
+	while (database->elements[index])
+	{
+		if (database->elements[index]->using)
+		{
+			index++;
+			continue ;
+		}
+		current = database->elements[index];
+		aux = current->index.offset;
+		fwrite(&(current->index.size), sizeof(size_t), 1, file);
+		fwrite(&aux, sizeof(size_t), 1, file);
+		index++;
+	}
+	fclose(file);
+
+	free(path);
 	return (0);
 }
 

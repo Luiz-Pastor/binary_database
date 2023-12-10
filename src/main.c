@@ -5,14 +5,6 @@
 #include "../inc/loop.h"
 #include "../inc/element.h"
 
-/*
-TODO:
-	- Guardar toda la información del archivo en estructuras
-	- Funcion para leer los comandos del usuario
-	- Guardar todos los cambios que se hayan hecho en el programa
-	- Liberar memoria
-*/
-
 /*static int  print_help(char *program)
 {
 	printf("Error. Usage: %s <insertion_mode> <database_file>.\n", program);
