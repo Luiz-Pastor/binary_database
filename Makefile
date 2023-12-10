@@ -25,7 +25,7 @@ $(NAME): $(OBJ)
 	@$(CC) $(OBJ) -o $(NAME)
 	@echo "$(C_GREEN)Compiled!$(C_CLEAR)"
 
-%.o: %.c
+%.o: src/%.c
 	@echo "$(C_YELLOW)\t> Compiling $< $(C_CLEAR)"
 	@$(CC) $(CFLAGS) -c $<
 

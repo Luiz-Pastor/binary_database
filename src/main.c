@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <string.h>
-#include "structs.h"
-#include "database.h"
-#include "loop.h"
-#include "element.h"
+#include "../inc/structs.h"
+#include "../inc/database.h"
+#include "../inc/loop.h"
+#include "../inc/element.h"
 
 /*
 TODO:
