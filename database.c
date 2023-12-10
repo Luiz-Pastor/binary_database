@@ -116,9 +116,10 @@ static void setOffset(Database *database)
 */
 Database        *read_database(char *insertion, char *filename)
 {
+	char		*path;
 	FILE		*file;				/* Archivo del que leer */
 	Element		*current;			/* Elemento que se crea */
-	Database	*database;
+	Database	*database;			/* Base de datos */
 
 	/* Variables auxiliares */
 	int			i;					/* Iterador del bucle*/
@@ -132,14 +133,26 @@ Database        *read_database(char *insertion, char *filename)
 	if (!database)
 		return (NULL);
 
+	path = calloc(strlen(filename) + 4, sizeof(char));
+	if (!path)
+	{
+		free_database(database);
+		return (NULL);
+	}
+
+	sprintf(path, "%s.db", filename);
+
 	/* Abrimos el archivo sobre el que vamos a leer */
-	file = fopen(filename, "rb");
+	file = fopen(path, "rb");
 	if (!file)
 	{
-		file = fopen(filename, "w");
+		/* No existe el archivo; se crea un archivo para poder escribir después */
+		file = fopen(path, "w");
 		fclose(file);
+		free(path);
 		return (database);
 	}
+	free(path);
 
 	/* Vamos guardando cada elemento */
 	while (!feof(file))
@@ -554,18 +567,29 @@ int         addDatabaseElement(Database *database, Element *element)
 /*
  * Function that saves the database information in a file
 */
-void    save_database(Database *database, char *filename)
+int    save_database(Database *database, char *filename)
 {
+	char	*path;
 	FILE	*file;
 	Element	*current;
 	size_t	index = 0;
 
 	if (!database)
-		return ;
+		return (1);
+
+	path = calloc(strlen(filename) + 4, sizeof(char));
+	if (!path)
+		return (1);
 	
-	file = fopen(filename, "w");
+	sprintf(path, "%s.db", filename);
+
+	file = fopen(path, "w");
 	if (!file)
-		return ;
+	{
+		free(path);
+		return (1);
+	}
+	free(path);
 
 	while (database->elements[index])
 	{
@@ -584,6 +608,7 @@ void    save_database(Database *database, char *filename)
 		index++;
 	}
 	fclose(file);
+	return (0);
 }
 
 /* =================================================================================== */

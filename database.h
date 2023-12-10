@@ -8,7 +8,7 @@
 			binary file.
  * 
  * @param	insertion Way to insert elements into the database.
- * @param 	filename Name of the file with the database.
+ * @param 	filename Name of the file that contains the database.
  * 
  * @return	Database struct, with an array with all the elements of the database,
  * 			NULL-terminated.
@@ -54,9 +54,11 @@ int			addDatabaseElement(Database *database, Element *element);
  * @brief	Function that saves the database information in a file.
  * 
  * @param	database Database from which to extract information.
- * @param	filename Name of the file where the information will be saved.
+ * @param	filename Name of the files where the information will be saved.
+ * 
+ * @return	0 if the database is saved, 1 if there is any problem
 */
-void		save_database(Database *database, char *filename);
+int		save_database(Database *database, char *filename);
 
 /*
  * @brief	Function that returns the last element of the database.

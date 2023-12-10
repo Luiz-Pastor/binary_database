@@ -39,18 +39,15 @@ static int  check_arguments(int argc, char **argv)
 
 int main(int argc, char *argv[])
 {
+	int			status;
 	Database	*database;
-	char		filename[1024];
 
 	/* Check arguments */
 	if (!check_arguments(argc, argv))
 		return (0);
 
-	/* Guardamos el nombre del archivo que leer y escribir */
-	sprintf(filename, "%s.db", argv[2]);
-
 	/* Read all the info in the database */
-	database = read_database(argv[1], filename);
+	database = read_database(argv[1], argv[2]);
 	if (!database)
 	{
 		printf("Error reading the database.\n");
@@ -60,13 +57,16 @@ int main(int argc, char *argv[])
 	/* Read the user commands */
 	take_commands(database);
 
-	/* printDatabase(database); */
-
 	/* Save all the information in the database file */
-	save_database(database, filename);
+	status = 0;
+	if (save_database(database, argv[2]))
+	{
+		printf("Error while saving the database\n");
+		status = 1;
+	}
 
 	/* Free the memory */
 	free_database(database); /* Una alternativa puede ser usar exit */
 
-	return (0);
+	return (status);
 }
