@@ -1,6 +1,8 @@
 *.o
 library
 test.db
+test.ind
+test.lst
 test_control.db
 .vscode
 tests/test.db
