@@ -3,3 +3,6 @@ library
 test.db
 test_control.db
 .vscode
+tests/test.db
+tests/test.ind
+tests/test.lst
