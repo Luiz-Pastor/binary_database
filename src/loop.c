@@ -63,10 +63,14 @@ static int command_add(char *input, Database *database)
 		return (MEMORY_ERROR);
 	
 	/* bookID */
-	string = strtok(input, "|");
+	string = ft_strdup(input);
+	if (!string)
+		return (MEMORY_ERROR);
+	string = strtok(string, "|");
 	if (!string)
 	{
 		deleteElement(element);
+		free(string);
 		return BAD_FORMAT;
 	}
 	element->index.key = atoi(string);
@@ -76,6 +80,7 @@ static int command_add(char *input, Database *database)
 	if (!string || strlen(string) != ISBN_LENGTH)
 	{
 		deleteElement(element);
+		free(string);
 		return BAD_FORMAT;
 	}
 	strcpy(element->isbn, string);
@@ -85,6 +90,7 @@ static int command_add(char *input, Database *database)
 	if (!string || strlen(string) > MAX_LENGTH)
 	{
 		deleteElement(element);
+		free(string);
 		return BAD_FORMAT;
 	}
 	element->title = ft_strdup(string);
@@ -94,6 +100,7 @@ static int command_add(char *input, Database *database)
 	if (!string || strlen(string) > MAX_LENGTH)
 	{
 		deleteElement(element);
+		free(string);
 		return BAD_FORMAT;
 	}
 	element->printedBy = ft_strdup(string);
@@ -102,9 +109,10 @@ static int command_add(char *input, Database *database)
 	if (addDatabaseElement(database, element))
 	{
 		deleteElement(element);
+		free(string);
 		return REPEATED_ELEMENT;
 	}
-
+	free(string);
 	return (OK);
 }
 
@@ -276,8 +284,8 @@ void    take_commands(Database *database)
 				switch (command_add(arguments, database))
 				{
 					case OK:
-						element = getLastElement(database);
-						printf("Record with BookID=%d has been added to the database\n", element->index.key);
+						arguments = strtok(arguments, "|");
+						printf("Record with BookID=%s has been added to the database\n", arguments);
 						break ;
 					case REPEATED_ELEMENT:
 						arguments = strtok(arguments, "|");
