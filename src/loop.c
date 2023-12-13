@@ -56,6 +56,7 @@ static int get_command(char *command)
 static int command_add(char *input, Database *database)
 {
 	Element	*element;
+	char	*copy;
 	char	*string;
 
 	element = createElement();
@@ -63,14 +64,14 @@ static int command_add(char *input, Database *database)
 		return (MEMORY_ERROR);
 	
 	/* bookID */
-	string = ft_strdup(input);
-	if (!string)
+	copy = ft_strdup(input);
+	if (!copy)
 		return (MEMORY_ERROR);
-	string = strtok(string, "|");
+	string = strtok(copy, "|");
 	if (!string)
 	{
 		deleteElement(element);
-		free(string);
+		free(copy);
 		return BAD_FORMAT;
 	}
 	element->index.key = atoi(string);
@@ -80,7 +81,7 @@ static int command_add(char *input, Database *database)
 	if (!string || strlen(string) != ISBN_LENGTH)
 	{
 		deleteElement(element);
-		free(string);
+		free(copy);
 		return BAD_FORMAT;
 	}
 	strcpy(element->isbn, string);
@@ -90,7 +91,7 @@ static int command_add(char *input, Database *database)
 	if (!string || strlen(string) > MAX_LENGTH)
 	{
 		deleteElement(element);
-		free(string);
+		free(copy);
 		return BAD_FORMAT;
 	}
 	element->title = ft_strdup(string);
@@ -100,7 +101,7 @@ static int command_add(char *input, Database *database)
 	if (!string || strlen(string) > MAX_LENGTH)
 	{
 		deleteElement(element);
-		free(string);
+		free(copy);
 		return BAD_FORMAT;
 	}
 	element->printedBy = ft_strdup(string);
@@ -109,10 +110,10 @@ static int command_add(char *input, Database *database)
 	if (addDatabaseElement(database, element))
 	{
 		deleteElement(element);
-		free(string);
+		free(copy);
 		return REPEATED_ELEMENT;
 	}
-	free(string);
+	free(copy);
 	return (OK);
 }
 
