@@ -654,17 +654,13 @@ int    save_database(Database *database, char *filename)
 	/* Recorremos la lista de eliminados */
 	/* Size | offset */
 	index = 0;
-	while (database->elements[index])
+	fwrite(&database->type, sizeof(int), 1, file);
+	while (database->deleted[index])
 	{
-		if (database->elements[index]->using)
-		{
-			index++;
-			continue ;
-		}
-		current = database->elements[index];
+		current = database->deleted[index];
 		aux = current->index.offset;
-		fwrite(&(current->index.size), sizeof(size_t), 1, file);
 		fwrite(&aux, sizeof(size_t), 1, file);
+		fwrite(&(current->index.size), sizeof(size_t), 1, file);
 		index++;
 	}
 	fclose(file);

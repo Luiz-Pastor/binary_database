@@ -33,9 +33,9 @@ typedef struct {
 
 /* Tipo de inserción en la base de datos */
 enum {
-	FIRST_FIT,
+	BEST_FIT,
 	WORST_FIT,
-	BEST_FIT
+	FIRST_FIT
 };
 
 /* Posibles errores de algunas funciones en específico */
