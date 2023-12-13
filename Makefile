@@ -15,7 +15,7 @@ SRC=	main.c		\
 		element.c	\
 		database.c	\
 		loop.c
-OBJ=$(SRC:%.c=%.o)
+OBJ=$(SRC:%.c=obj/%.o)
 ##############################################
 
 all: $(NAME)
@@ -25,9 +25,10 @@ $(NAME): $(OBJ)
 	@$(CC) $(OBJ) -o $(NAME)
 	@echo "$(C_GREEN)Compiled!$(C_CLEAR)"
 
-%.o: src/%.c
+obj/%.o: src/%.c
+	@mkdir -p obj/
 	@echo "$(C_YELLOW)\t> Compiling $< $(C_CLEAR)"
-	@$(CC) $(CFLAGS) -c $<
+	@$(CC) $(CFLAGS) -c $< -o $@
 
 ##############################################
 
@@ -53,12 +54,47 @@ test: all
 	@echo "\t\t$(C_GREEN)###################$(C_CLEAR)"
 	@cd tests; ./many_entries.sh
 
+	@echo "\n\n\t\t$(C_GREEN)#########################$(C_CLEAR)"
+	@echo "\t\t$(C_GREEN)# $(C_YELLOW)add.sh $(C_GREEN)#$(C_CLEAR)"
+	@echo "\t\t$(C_GREEN)#########################$(C_CLEAR)"
+	@cd tests; ./add_delete_test_03.sh
+
+	@echo "\n\n\t\t$(C_GREEN)#########################$(C_CLEAR)"
+	@echo "\t\t$(C_GREEN)# $(C_YELLOW)add_delete_test_01.sh $(C_GREEN)#$(C_CLEAR)"
+	@echo "\t\t$(C_GREEN)#########################$(C_CLEAR)"
+	@cd tests; ./add_delete_test_01.sh
+
+	@echo "\n\n\t\t$(C_GREEN)#########################$(C_CLEAR)"
+	@echo "\t\t$(C_GREEN)# $(C_YELLOW)add_delete_test_02.sh $(C_GREEN)#$(C_CLEAR)"
+	@echo "\t\t$(C_GREEN)#########################$(C_CLEAR)"
+	@cd tests; ./add_delete_test_02.sh
+
+	@echo "\n\n\t\t$(C_GREEN)#########################$(C_CLEAR)"
+	@echo "\t\t$(C_GREEN)# $(C_YELLOW)add_delete_test_03.sh $(C_GREEN)#$(C_CLEAR)"
+	@echo "\t\t$(C_GREEN)#########################$(C_CLEAR)"
+	@cd tests; ./add_delete_test_03.sh
+
+	@echo "\n\n\t\t$(C_GREEN)#########################$(C_CLEAR)"
+	@echo "\t\t$(C_GREEN)# $(C_YELLOW)add_delete_test_04.sh $(C_GREEN)#$(C_CLEAR)"
+	@echo "\t\t$(C_GREEN)#########################$(C_CLEAR)"
+	@cd tests; ./add_delete_test_04.sh
+
+	@echo "\n\n\t\t$(C_GREEN)#####################$(C_CLEAR)"
+	@echo "\t\t$(C_GREEN)# $(C_YELLOW)add_index_test.sh $(C_GREEN)#$(C_CLEAR)"
+	@echo "\t\t$(C_GREEN)#####################$(C_CLEAR)"
+	@cd tests; ./add_index_test.sh
+
+	@echo "\n\n\t\t$(C_GREEN)###################$(C_CLEAR)"
+	@echo "\t\t$(C_GREEN)# $(C_YELLOW)reload_index.sh $(C_GREEN)#$(C_CLEAR)"
+	@echo "\t\t$(C_GREEN)###################$(C_CLEAR)"
+	@cd tests; ./reload_index.sh
+
 	@echo "\n$(C_RED)@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@$(C_CLEAR)\n"
 	@rm -rf tests/test.db
 ##############################################
 
 clean:
-	@rm -rf $(OBJ)
+	@rm -rf obj/
 
 fclean: clean
 	@rm -rf $(NAME)
