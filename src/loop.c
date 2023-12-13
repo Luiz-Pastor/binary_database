@@ -231,7 +231,6 @@ static void command_printrec(Database *database)
 	free(order);
 }
 
-/* TODO: añadir y comentar el comando printLst */
 static void	command_printlst(Database *database)
 {
 	int	index;
