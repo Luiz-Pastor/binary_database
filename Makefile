@@ -10,12 +10,13 @@ CC := gcc
 CFLAGS := -Wall -Werror -pedantic -ansi -g3
 ##############################################
 NAME=library
-HEADER=element.h
 SRC=	main.c		\
 		element.c	\
 		database.c	\
 		loop.c
 OBJ=$(SRC:%.c=obj/%.o)
+##############################################
+TEST_FILE=test
 ##############################################
 
 all: $(NAME)
@@ -32,8 +33,6 @@ obj/%.o: src/%.c
 
 ##############################################
 
-TEST_FILE=test
-
 first_fit: $(NAME)
 	./$(NAME) first_fit $(TEST_FILE)
 
@@ -42,6 +41,9 @@ worst_fit: $(NAME)
 
 best_fit: $(NAME)
 	./$(NAME) best_fit $(TEST_FILE)
+
+valgrind: $(NAME)
+	./$(NAME) first_fit $(TEST_FILE)
 
 ##############################################
 
@@ -67,31 +69,37 @@ test: all
 	@echo "\t\t$(C_GREEN)###################$(C_CLEAR)"
 	@cd tests; ./many_entries.sh
 
+# Cuarto test
 	@echo "\n\n\t\t$(C_GREEN)#########################$(C_CLEAR)"
 	@echo "\t\t$(C_GREEN)# $(C_YELLOW)add_delete_test_01.sh $(C_GREEN)#$(C_CLEAR)"
 	@echo "\t\t$(C_GREEN)#########################$(C_CLEAR)"
 	@cd tests; ./add_delete_test_01.sh
 
+# Quinto test
 	@echo "\n\n\t\t$(C_GREEN)#########################$(C_CLEAR)"
 	@echo "\t\t$(C_GREEN)# $(C_YELLOW)add_delete_test_02.sh $(C_GREEN)#$(C_CLEAR)"
 	@echo "\t\t$(C_GREEN)#########################$(C_CLEAR)"
 	@cd tests; ./add_delete_test_02.sh
 
+# Sexto test
 	@echo "\n\n\t\t$(C_GREEN)#########################$(C_CLEAR)"
 	@echo "\t\t$(C_GREEN)# $(C_YELLOW)add_delete_test_03.sh $(C_GREEN)#$(C_CLEAR)"
 	@echo "\t\t$(C_GREEN)#########################$(C_CLEAR)"
 	@cd tests; ./add_delete_test_03.sh
 
+# Séptimo test
 	@echo "\n\n\t\t$(C_GREEN)#########################$(C_CLEAR)"
 	@echo "\t\t$(C_GREEN)# $(C_YELLOW)add_delete_test_04.sh $(C_GREEN)#$(C_CLEAR)"
 	@echo "\t\t$(C_GREEN)#########################$(C_CLEAR)"
 	@cd tests; ./add_delete_test_04.sh
 
+# Octavo test
 	@echo "\n\n\t\t$(C_GREEN)#####################$(C_CLEAR)"
 	@echo "\t\t$(C_GREEN)# $(C_YELLOW)add_index_test.sh $(C_GREEN)#$(C_CLEAR)"
 	@echo "\t\t$(C_GREEN)#####################$(C_CLEAR)"
 	@cd tests; ./add_index_test.sh
 
+# Noveno test
 	@echo "\n\n\t\t$(C_GREEN)###################$(C_CLEAR)"
 	@echo "\t\t$(C_GREEN)# $(C_YELLOW)reload_index.sh $(C_GREEN)#$(C_CLEAR)"
 	@echo "\t\t$(C_GREEN)###################$(C_CLEAR)"
