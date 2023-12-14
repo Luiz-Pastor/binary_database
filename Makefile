@@ -32,6 +32,19 @@ obj/%.o: src/%.c
 
 ##############################################
 
+TEST_FILE=test
+
+first_fit: $(NAME)
+	$(NAME) first_fit $(TEST_FILE)
+
+worst_fit: $(NAME)
+	$(NAME) worst_fit $(TEST_FILE)
+
+best_fit: $(NAME)
+	$(NAME) best_fit $(TEST_FILE)
+
+##############################################
+
 test: all
 	@rm -rf tests/test.db
 	@echo "\n$(C_RED)@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@$(C_CLEAR)"
@@ -53,11 +66,6 @@ test: all
 	@echo "\t\t$(C_GREEN)# $(C_YELLOW)many_entries.sh $(C_GREEN)#$(C_CLEAR)"
 	@echo "\t\t$(C_GREEN)###################$(C_CLEAR)"
 	@cd tests; ./many_entries.sh
-
-	@echo "\n\n\t\t$(C_GREEN)#########################$(C_CLEAR)"
-	@echo "\t\t$(C_GREEN)# $(C_YELLOW)add.sh $(C_GREEN)#$(C_CLEAR)"
-	@echo "\t\t$(C_GREEN)#########################$(C_CLEAR)"
-	@cd tests; ./add_delete_test_03.sh
 
 	@echo "\n\n\t\t$(C_GREEN)#########################$(C_CLEAR)"
 	@echo "\t\t$(C_GREEN)# $(C_YELLOW)add_delete_test_01.sh $(C_GREEN)#$(C_CLEAR)"
