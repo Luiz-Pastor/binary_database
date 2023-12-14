@@ -171,12 +171,17 @@ expect	"exit"
 send	"exit\n"
 expect	"exit"
 
-puts	"\n\t#1. The program finishes execution correctly"
+
+
+set green "\033\[1;32m"
+set red "\033\[1;31m"
+
+puts	"\n\t${green}#1. The program finishes execution correctly"
 
 if {[file exists [file join $filename.db]]} {
-    puts "\t#2. File $filename.db exists"
+    puts "\t${green}#2. File $filename.db exists"
 } else {
-    puts "\t#2. File $filename.db NOT found"
+    puts "\t${red}#2. File $filename.db NOT found"
 }
 
 set output "differ"
@@ -184,7 +189,7 @@ try {
 set output [exec diff -s $filename.db test_control_use_deleted_books.db]
 } trap CHILDSTATUS {} {}
 if {[regexp -nocase "identical" $output] || [regexp -nocase "idénticos" $output]} {
-    puts "\t#3. The information is saved correctly"
+    puts "\t${green}#3. The information is saved correctly"
 } else {
-    puts "\t#3. Information is saved incorrectly"
+    puts "\t${red}#3. Information is saved incorrectly"
 }
