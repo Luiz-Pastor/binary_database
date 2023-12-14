@@ -96,7 +96,7 @@ static Database *initDatabase(char *insertion)
  * 
  * @param	database The database to change.
 */
-static void setOffset(Database *database)
+static void setNormalOffset(Database *database)
 {
 	int	i = 0, offset = 0;
 
@@ -105,9 +105,77 @@ static void setOffset(Database *database)
 	while (database->elements[i])
 	{
 		database->elements[i]->index.offset = offset;
-		/* offset += database->elements[i]->index.size + strlen(database->elements[i]->printedBy) + 1; */
 		offset += database->elements[i]->index.size + 8;
 		i++;
+	}
+}
+
+static void	setOffset(Database *database, char *filename)
+{
+	FILE	*file;
+	char	*path;
+	int		index;
+
+	int		key;
+	long	offset;
+
+	path = calloc(strlen(filename) + 5, sizeof(char));
+	if (!path)
+		return ;
+
+	sprintf(path, "%s.ind", filename);
+
+	file = fopen(path, "rb");
+	if (!file)
+	{
+		free(path);
+		setNormalOffset(database);
+		return ;
+	}
+
+	index = 0;
+	while (database->elements[index])
+		database->elements[index++]->index.offset = -1;
+
+	while (fread(&key, sizeof(int), 1, file))
+	{
+		fread(&offset, sizeof(long), 1, file);
+
+		/* Buscamos el elemento y le asignamos el offset */
+		index = 0;
+		while (database->elements[index])
+		{
+			if (database->elements[index]->index.key == key)
+			{
+				database->elements[index]->index.offset = offset;
+				break ;
+			}
+			index++;
+		}
+
+		/*
+			Si no se ha encontrado el elemento, lo marcamos como error y un offset dependiendo
+			de cuando se ha añadido, sin prestar atención al archivo de índices
+		*/
+		if (!database->elements[index])
+		{
+			setNormalOffset(database);
+			return ;
+		}
+	}
+
+	index = 0;
+	while (database->elements[index])
+	{
+		if (database->elements[index]->index.offset == -1)
+			break ;
+		index++;
+	}
+	/* Si encontramos algún elemento sin offset, ponemos todos como queramos */
+	if (database->elements[index])
+	{
+		setNormalOffset(database);
+		return ;
 	}
 }
 
@@ -232,7 +300,8 @@ Database        *read_database(char *insertion, char *filename)
 			return (error_reading(current, NULL, &file));
 		}
 	}
-	setOffset(database);
+	/*setOffset(database);*/
+	setOffset(database, filename);
 	fclose(file);
 	return (database);
 }
