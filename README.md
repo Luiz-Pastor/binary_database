@@ -1,13 +1,67 @@
-# Práctica 3: base de datos binaria
+# Binary database
+## Información sobre el proyecto
+El objetivo del proyecto es crear un programa capaz de funcionar como si fuera un gesto de bases de datos, pudiendo almacenar en diferentes ficheros información sobre los elementos que se menten en esta bd.
+En este caso, nuestro gesto funcionara insertando libros en una biblioteca. Estos libros tienen 4 campos:
+- `bookID/key` (número entero) [clave primaria].
+- `ISBN` (16 carácteres).
+- `title` (texto variable).
+- `printedBy` (texto variable).
 
+Además, cada libro contiene, de forma interna, dos campos:
+- `size`: tamaño en bytes del bloque de memoria correspondiente.
+- `offset`: posición en memoria en la que se encuentra el libro en la base de datos.
 
+Una vez finalizado el programa, se guardan en 3 archivos diferentes la información de la ejecución:
+- `"file".db`: información sobre los registros/elementos/libros de la base de datos
+- `"file".ind`: información sobre los índices de los registros de la base de datos
+- `"file".lst`: información sobre los elementos eliminados durante la ejecución del programa
+
+Ante la carga de la base de datos, se tienen en cuenta los archivos con extensiones .db y .ind, para colocar los elementos en su posición correspondiente, pero no se usa en ningún momento los elementos eliminados de otras ejecuciones
+
+## Estructuración
+```
+/root
+ |-- /inc (localización de los archivos de cabecera)
+ |-- /src (localización de los archivos fuente)
+ |-- /tests (localización de los tests automáticos)
+ |
+ |- Makefile
+ |- README.md
+```
 
 ## Compilación
 Para poder compilar el programa basta con ejecutar el comando:
 ```bash
 make
 ```
-Se crearán una carpeta "obj" con los objetos (.o) creados al compilar. El makefile está preparado para no poder realizar relink.
+En caso de no tener dicho comando instalado, instalar el recurso a través de uno de los siguientes comandos:
+- Linux
+```bash
+sudo apt-get install make
+```
+- MaxOS (brew)
+```bash
+brew install make
+```
+
+
+Una vez compilado, se crearán una carpeta "obj" con los objetos (.o) creados al compilar. El makefile está preparado para no poder relink.
+
+## Forma de usar
+Para poder ejecutar el programa, es necesario introducir 2 parámetros:
+- Forma de inserción de los elementos en la base de datos. Existen 3 posibilidades
+	- first_fit: inserta los elementos en el primer espacio vacío en el que quepa
+	- best_fit: inserta los elementos en el espacio más pequeño que encuentre
+	- worst_fit: inserta los elementos en el espacio más grande que encuentre
+- Nombre del archivo (sin extensión) del que se va a leer la base de datos.
+```
+~ ./library "mode" "file"
+```
+
+Ejemplo:
+```bash
+~ ./library first_fit test
+```
 
 ## Comandos del makefile
 
