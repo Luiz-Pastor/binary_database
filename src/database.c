@@ -126,9 +126,9 @@ static void	setOffset(Database *database, char *filename)
 	sprintf(path, "%s.ind", filename);
 
 	file = fopen(path, "rb");
+	free(path);
 	if (!file)
 	{
-		free(path);
 		setNormalOffset(database);
 		return ;
 	}
@@ -160,9 +160,12 @@ static void	setOffset(Database *database, char *filename)
 		if (!database->elements[index])
 		{
 			setNormalOffset(database);
+			fclose(file);
 			return ;
 		}
 	}
+
+	fclose(file);
 
 	index = 0;
 	while (database->elements[index])
