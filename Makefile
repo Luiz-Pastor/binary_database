@@ -35,18 +35,18 @@ obj/%.o: src/%.c
 TEST_FILE=test
 
 first_fit: $(NAME)
-	$(NAME) first_fit $(TEST_FILE)
+	./$(NAME) first_fit $(TEST_FILE)
 
 worst_fit: $(NAME)
-	$(NAME) worst_fit $(TEST_FILE)
+	./$(NAME) worst_fit $(TEST_FILE)
 
 best_fit: $(NAME)
-	$(NAME) best_fit $(TEST_FILE)
+	./$(NAME) best_fit $(TEST_FILE)
 
 ##############################################
 
 test: all
-	@rm -rf tests/test.db
+	@rm -rf tests/test.db tests/test.ind tests/test.lst
 	@echo "\n$(C_RED)@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@$(C_CLEAR)"
 
 # Primer test
@@ -98,7 +98,20 @@ test: all
 	@cd tests; ./reload_index.sh
 
 	@echo "\n$(C_RED)@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@$(C_CLEAR)\n"
-	@rm -rf tests/test.db
+	@rm -rf tests/test.db tests/test.ind tests/test.lst
+
+personal_test: $(NAME)
+	@rm -rf tests/test.db tests/test.ind tests/test.lst
+	@echo "\n$(C_RED)@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@$(C_CLEAR)"
+
+	@echo "\n\n\t\t$(C_GREEN)###################$(C_CLEAR)"
+	@echo "\t\t$(C_GREEN)# $(C_YELLOW)test_use_deleted_books.sh $(C_GREEN)#$(C_CLEAR)"
+	@echo "\t\t$(C_GREEN)###################$(C_CLEAR)"
+	@cd tests; ./test_use_deleted_books.sh
+
+	@echo "\n$(C_RED)@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@$(C_CLEAR)\n"
+	@rm -rf tests/test.db tests/test.ind tests/test.lst
+
 ##############################################
 
 clean:
@@ -112,12 +125,3 @@ re: fclean $(NAME)
 .PHONY: clean fclean re restart
 
 ##############################################
-
-env:
-	@cp tests/test_control.db .
-
-run: all
-	./library first_fit test_control
-
-valgrind: all
-	valgrind --leak-check=full ./library first_fit test_control
